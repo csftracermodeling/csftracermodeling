@@ -4,7 +4,7 @@
 
 - FreeSurfer needs to be installed
 - the conda environment `diffusion-fenics-env` needs to be installed (see below)
-- The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
+- The following folders/files are needed and can be obtained from https://github.com/bzapf/rawdata and should be put into the top level under `/data/` in your cloned reposity as:
 ```
 ├──data
     ├──freesurfer
@@ -18,7 +18,9 @@
 
 ## For inverse problems (PINN and FEM)
 
-This data can be obtained from ??? and should be put into the top level in your cloned reposity as:
+Assumes that MRI have been processed and concentration estimates computed. Also a mesh is assumed and a ROI.
+Alternatively, this data can be obtained from https://github.com/bzapf/concentrationdata
+and should be put into the top level in your cloned reposity under `/data/` as:
 ```
 ├──data
     ├──freesurfer
