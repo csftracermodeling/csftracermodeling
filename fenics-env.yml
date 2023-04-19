@@ -1,0 +1,20 @@
+name: diffusion-fenics-env
+channels:
+  - conda-forge
+dependencies:
+  - fenics=2019.1.0=py39hf3d152e_29
+  - numpy
+  - matplotlib
+  - connected-components-3d
+  - scikit-image
+  - scipy
+  - nibabel
+  - h5py
+  - pip
+  - pip:
+    - meshio
+    - tqdm
+    - parse
+    - git+https://github.com/dolfin-adjoint/pyadjoint.git@2019.1.2
+    - git+https://github.com/SVMTK/SVMTK
+

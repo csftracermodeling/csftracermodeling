@@ -1,0 +1,19 @@
+name: jax-fenics-env
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - matplotlib
+  - fenics
+  - connected-components-3d
+  - scipy
+  - pip
+  - h5py
+  - scikit-image
+  - nibabel
+  - pip:
+    - jax
+    - jaxtyping
+    - jaxopt
+    - typeguard
+    - git+https://github.com/dolfin-adjoint/pyadjoint.git@2019.1.2

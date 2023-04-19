@@ -1,0 +1,44 @@
+import numpy as np
+from tracerdiffusion.domains import ImageDomain
+import matplotlib.pyplot as plt
+import nibabel
+
+domainmask = "./roi12/parenchyma_mask_roi.mgz"
+boundarymask = "./roi12/parenchyma_mask_boundary.mgz"
+datapath="./data/freesurfer/CONCENTRATIONS/"
+
+if domainmask.endswith("npy"):
+    mask = np.load(domainmask)
+    boundarymask = np.load(boundarymask)
+else:
+    mask = nibabel.load(domainmask).get_fdata().astype(bool)
+    boundarymask = nibabel.load(boundarymask).get_fdata().astype(bool)
+
+
+pixelsizes = [1, 1, 1] # in mm
+
+# Sample from the domain
+potato = ImageDomain(mask=mask, pixelsizes=pixelsizes)
+samples = potato.sample(n=100)
+
+
+print("Bounds:", potato.bounds())
+
+# Sample from the boundary only
+potato_boundary = ImageDomain(mask=boundarymask, pixelsizes=pixelsizes)
+boundary_samples = potato_boundary.sample(n=100)
+
+
+
+fig = plt.figure()
+
+ax = fig.add_subplot(projection='3d')
+
+ax.scatter(potato.voxel_center_coordinates[:,0], potato.voxel_center_coordinates[:,1],potato.voxel_center_coordinates[:,2], 
+           label="voxel center coordinates", marker="o", facecolors='none', edgecolors='blue')
+ax.scatter(samples[:,0], samples[:,1],samples[:,2], marker="x", color="r", label="random interior samples")
+ax.scatter(boundary_samples[:,0], boundary_samples[:,1], boundary_samples[:,2], marker="x", color="g", label="boundary")
+plt.legend()
+plt.show()
+
+
