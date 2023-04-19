@@ -6,7 +6,6 @@
 
 The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
 ```
-
 ├──data
     ├──freesurfer
         ├── PREREG
@@ -18,12 +17,12 @@ The following folders/files are needed and can be obtained from ??? and should b
 
         
         │   ├── parenchyma_mask.mgz
-
+```
 
 ## For inverse problems (PINN and FEM)
 
 This data can be obtained from ??? and should be put into the top level in your cloned reposity as:
-
+```
 ├──data
     ├──freesurfer
         ├── CONCENTRATIONS
@@ -37,7 +36,8 @@ This data can be obtained from ??? and should be put into the top level in your 
 ├──roi12
     ├──parenchyma_mask_roi.mgz
     ├──parenchyma_mask_boundary.mgz
-        
+```
+
 # Setup
 
 For FEniCS scripts and data processing, run in terminal:
