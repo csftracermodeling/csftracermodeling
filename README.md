@@ -3,8 +3,8 @@
 ## For data processing
 
 - FreeSurfer needs to be installed
-- The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
 - the conda environment `diffusion-fenics-env` needs to be installed (see below)
+- The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
 ```
 ├──data
     ├──freesurfer
