@@ -1,10 +1,10 @@
 # Requirements
 
-- For data processing, FreeSurfer needs to be installed
-- the following files are needed
+## For data processing
 
-
-The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
+- FreeSurfer needs to be installed
+- The following folders/files are needed and can be obtained from ??? and should be put into the top level in your cloned reposity as:
+- the conda environment `diffusion-fenics-env` needs to be installed (see below)
 ```
 ├──data
     ├──freesurfer
@@ -43,8 +43,8 @@ This data can be obtained from ??? and should be put into the top level in your 
 For FEniCS scripts and data processing, run in terminal:
 
 ```
-git clone https://github.com/bzapf/inverseDiffusion.git
-cd inverseDiffusion
+git clone https://github.com/bzapf/tracerdiffusion.git
+cd tracerdiffusion
 conda env create -f fenics-env.yml
 conda activate diffusion-fenics-env
 pip install -e .
