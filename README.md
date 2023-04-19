@@ -14,9 +14,6 @@
         |   ├── ...
         ├── mri
         │   ├── aseg.mgz
-
-        
-        │   ├── parenchyma_mask.mgz
 ```
 
 ## For inverse problems (PINN and FEM)
