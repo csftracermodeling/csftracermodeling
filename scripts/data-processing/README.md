@@ -15,28 +15,27 @@
 
 The following folders/files are needed:
 ```
-
-${WORKDIR}
-├── PREREG
-|   ├── 20230213_073508.mgz
-|   ├── 20230213_143049.mgz
-|   ├── 20230214_094033.mgz
-|   ├── 20230215_101347.mgz
-|   ├── 20230216_080616.mgz
-├── mri
-│   ├── aseg.mgz
+├──data
+    ├──freesurfer
+        ├── PREREG
+        |   ├── 20220230_070707.mgz
+        |   ├── 20220230_080808.mgz
+        |   ├── ...
+        ├── mri
+        │   ├── aseg.mgz
 ```
+
 
 ## Getting started
 
 ```
-git clone https://github.com/bzapf/inverseDiffusion
+git clone https://github.com/bzapf/tracerdiffusion
 ```
 
 ## Usage
 
 ```
-$ cd inverseDiffusion
+$ cd tracerdiffusion
 ```
 
 Set path to data for simplicity
@@ -60,9 +59,10 @@ We next normalize the (registered) T1 weighted images (divide by median signal i
 See [2] (Supplementary Material) for details.
 
 ```
-python ./scripts/data-processing/normalize.py --inputfolder ${WORKDIR}/REGISTERED/ \
---exportfolder ${WORKDIR}/NORMALIZED_CONFORM/ \
---refroi ${WORKDIR}/mri/refroi.mgz
+python ./scripts/data-processing/normalize.py \
+--inputfolder ./data/freesurfer/REGISTERED/ \
+--exportfolder ./data/freesurfer/NORMALIZED_CONFORM/ \
+--refroi ./data/freesurfer/mri/refroi.mgz
 ```
 
 ### Create brain mask and synthetic T1 map
@@ -70,37 +70,33 @@ python ./scripts/data-processing/normalize.py --inputfolder ${WORKDIR}/REGISTERE
 Create an image with voxel value 1 s everywhere inside the parenchyma:
 
 ```
-python ./scripts/data-processing/make_brainmask.py --aseg ${WORKDIR}/mri/aseg.mgz --t1 1 \ 
---maskname ${WORKDIR}/mri/parenchyma_only.mgz \
---t1mapname ${WORKDIR}/mri/synthetic_T1_map.mgz \
+python ./scripts/data-processing/make_brainmask.py \
+--aseg ./data/freesurfer/mri/aseg.mgz \
+--maskname ./data/freesurfer/mri/parenchyma_mask.mgz \
+--t1 1 --t1mapname ./data/freesurfer/mri/synth_T1_map.mgz
 ```
 
 
 ### Tracer estimation
 
-To estimate tracer concentrations as in [1] (Supplementary Material),
+To estimate tracer concentrations as in [1] (Supplementary Material), first create a synthetic T1 Map and run
 
 ```
-python ./scripts/data-processing/estimatec.py --inputfolder ${WORKDIR}/NORMALIZED_CONFORM/ \
---exportfolder ${WORKDIR}/CONCS_constT1/ --t1map ${WORKDIR}/mri/synthetic_T1_map.mgz
+python ./scripts/data-processing/estimatec.py \
+--inputfolder ./data/freesurfer/NORMALIZED_CONFORM/ \
+--exportfolder ./data/freesurfer/CONCENTRATIONS/ \
+--t1map ./data/freesurfer/mri/synth_T1_map.mgz \
+--mask ./data/freesurfer/mri/parenchyma_mask.mgz
 ```
-will create a binary mask for the parenchyma under  `${WORKDIR}/mri/parenchyma_only.mgz`.
 
-
-We can also map out everything outside the brain to get a cleaner image:
-```
-python ./scripts/data-processing/estimatec.py --inputfolder ${WORKDIR}/NORMALIZED_CONFORM/ \
---exportfolder ${WORKDIR}/CONCENTRATION/ --t1map ${WORKDIR}/mri/synthetic_T1_map.mgz \
---mask ${WORKDIR}/mri/parenchyma_only.mgz
-```
 
 
 
 If a T1 map is available (same resolution as T1 weighted images and registered to T1 weighted images)
 ```
-python ./scripts/data-processing/estimatec.py --inputfolder ${WORKDIR}/NORMALIZED_CONFORM/ \
---exportfolder ${WORKDIR}/CONCS_T1MAP/ --t1map ${WORKDIR}/<path_to_your_T1_Map> \
---mask ${WORKDIR}/mri/parenchyma_only.mgz
+python ./scripts/data-processing/estimatec.py \
+--inputfolder ./data/freesurfer/REGISTERED/ \
+--exportfolder ./data/freesurfer/CONCENTRATIONS/
 ```
 
 ## References
