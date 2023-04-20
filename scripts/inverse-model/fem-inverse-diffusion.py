@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # mean_water_diffusivity = Constant(md)
 
     # simulate for up to 4 days after first image
-    tmax = 3600 * 3 * 24
+    tmax = 3 * 24
 
     d_init = 1e-3
     mean_water_diffusivity = Constant(d_init)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     else:
         mask = None
 
-    mris = FEniCS_Data(function_space=V, datapath=datapath, slice_params=slice_params, Tmax=tmax, mask=mask)
+    mris = FEniCS_Data(function_space=V, datapath=datapath, Tmax=tmax, mask=mask)
 
     mris.dump_pvd(vtkpath=str(outfolder / "data.pvd"))
 
