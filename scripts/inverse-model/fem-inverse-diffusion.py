@@ -1,9 +1,10 @@
 from fenics import *
-# import sys
-# sys.path.insert(0, "/home/basti/2023-mri2fem-ii/book2/chapters/tracerconcentration/code/computetracer/")
-# import tracerdiffusion
-import tracerdiffusion.config as config
 
+# Setting config.inverse = True will also import dolfin-adjoint in model.py.
+# This is necessary since we want to use model.py for both forward and inverse simulations,
+# and the forward simulations are faster if dolfin-adjoint does not keep track of the results.
+# Hence, config.inverse = False by default such that the forward model can be run as efficiently as possible
+import tracerdiffusion.config as config
 config.inverse = True
 
 from tracerdiffusion.model import Model
@@ -55,14 +56,14 @@ if __name__ == "__main__":
                         help="""Path to folder containing concentrations in mgz format. Assuming that imaging time is contained as YYYYMMDD_HHMMSS' in filename."""
                         )
     parser.add_argument("--mesh", default="./roi12/parenchyma_mask_roi12.xml", help="path to mesh as xml file.")
-    parser.add_argument("--mask", default="./roi/parenchyma_mask_roi.mgz",
+    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz",
                     help="path to mask from which mesh was made.")
     
     parser.add_argument("--outfolder", default="./simulation_outputs/")
     parser.add_argument("--lbfgs_iters", default=42)
     parser.add_argument("--dt", default=3600, type=float, help="timestep size")
     parser.add_argument("--taylortest", default=False, action="store_true", help="Run Taylor test to check if gradients are correct.")
-    parser.add_argument("--reaction", default=False, action="store_true", help="Optimize for reaction rate as well.")
+
     
     parserargs = vars(parser.parse_args())
 
@@ -123,33 +124,30 @@ if __name__ == "__main__":
 
     # alpha = Constant(1)
     
-    if parserargs["reaction"]:
-        r_init = 1e-5
-        reaction_rate = Constant(r_init)
-    else:
-        reaction_rate = None
+    r_init = 1e-5
+    reaction_rate = Constant(r_init)
+
 
     diffusion_model = Model(dt=parserargs["dt"], V=V, mris=mris, outfolder=outfolder)
 
     diffusion_model.forward(water_diffusivity=mean_water_diffusivity, r=reaction_rate, taylortest=parserargs["taylortest"])
 
-    mismatch = diffusion_model.return_value()
+    L2_mismatch = diffusion_model.return_value()
 
-    initial_missmatch = float(mismatch)
-    print("Simulation done, mismatch=", format(mismatch, ".2f"))
+    initial_missmatch = float(L2_mismatch)
+    print("Simulation done, mismatch=", format(L2_mismatch, ".2f"))
     diffusion_model.save_predictions(name="init")
 
     ctrls = [Control(mean_water_diffusivity)]
     bounds = [[0], [1e-2]]
     c0 = [mean_water_diffusivity]
 
-    if parserargs["reaction"]:
-        ctrls.append(Control(reaction_rate))
-        bounds = [[0, 0], [1e-2, 1e-5]]
-        c0 = [mean_water_diffusivity, reaction_rate]
+    ctrls.append(Control(reaction_rate))
+    bounds = [[0, 0], [1e-2, 1e-5]]
+    c0 = [mean_water_diffusivity, reaction_rate]
 
     print("Creating ReducedFunctional")
-    Jhat = ReducedFunctional(mismatch, ctrls)
+    Jhat = ReducedFunctional(L2_mismatch, ctrls)
 
     jhat0 = Jhat(c0)
 
@@ -184,15 +182,15 @@ if __name__ == "__main__":
 
     D_file = open(outfolder / 'D.txt', 'a')
 
-    if parserargs["reaction"]:
-        r_during_optim = []
 
-        r_file = open(outfolder / 'r.txt', 'w')
-        r_file.write(str(r_init))
-        r_file.close()
+    r_during_optim = []
 
-        r_file = open(outfolder / 'r.txt', 'a')
-        
+    r_file = open(outfolder / 'r.txt', 'w')
+    r_file.write(str(r_init))
+    r_file.close()
+
+    r_file = open(outfolder / 'r.txt', 'a')
+    
 
     opt_ctrls = minimize(Jhat, method="L-BFGS-B", callback=iter_cb, bounds=bounds,
                             options={"disp": True, "maxiter": int(parserargs["lbfgs_iters"])})
@@ -212,28 +210,27 @@ if __name__ == "__main__":
     print("final_D", D_during_optim[-1])
 
 
-    if parserargs["reaction"]:
 
 
         
-        vals = numpy.zeros(1)
-        vals[0] = assemble(opt_ctrls[1]*dx(domain=brainmesh))/assemble(1*dx(domain=brainmesh))
-        print("After optim. r =", format(vals[0], ".2e"))
+    vals = numpy.zeros(1)
+    vals[0] = assemble(opt_ctrls[1]*dx(domain=brainmesh))/assemble(1*dx(domain=brainmesh))
+    print("After optim. r =", format(vals[0], ".2e"))
 
-        final_r = r_during_optim[-1]
+    final_r = r_during_optim[-1]
 
-        print("final_r", final_r)
+    print("final_r", final_r)
 
     # diffusion_model = Model(dt=parserargs["dt"], V=V, mris=mris, outfolder=outfolder, mean_water_diffusivity=final_D)
-    mismatch = diffusion_model.forward(water_diffusivity=final_D, r=final_r, taylortest=parserargs["taylortest"])
+    L2_mismatch = diffusion_model.forward(water_diffusivity=final_D, r=final_r, taylortest=parserargs["taylortest"])
 
-    print("Simulation done, mismatch=", format(mismatch, ".2f"))
+    print("Simulation done, mismatch=", format(L2_mismatch, ".2f"))
 
     # assert numpy.allclose(mismatch, J)
 
-    print("Final / Initial Mismatch =", format(float(mismatch) / initial_missmatch, ".2f"))
+    print("Final / Initial Mismatch =", format(float(L2_mismatch) / initial_missmatch, ".2f"))
 
-    if float(mismatch) / initial_missmatch > 1:
+    if float(L2_mismatch) / initial_missmatch > 1:
         raise ValueError("Optimizaiton did not improve ?!")
 
     diffusion_model.save_predictions(name="final")

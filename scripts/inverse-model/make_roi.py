@@ -12,7 +12,7 @@ import argparse
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--maskfile", default="./data/mridata3d/mri/parenchyma_mask.mgz", help="Path to parenchyma_mask.mgz")
+    parser.add_argument("--maskfile", default="./data/freesurfer/mri/parenchyma_mask.mgz", help="Path to parenchyma_mask.mgz")
     parser.add_argument("--resolution", type=int, default=20, help="Resolution of the volume mesh for the ROI")
     parser.add_argument("-R", "--radius", type=int, default=10, help="ROI radius in number of voxels (integer)")
     parser.add_argument("-i", "--center_i", type=int, default=146, help="roi center in first direction")
