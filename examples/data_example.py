@@ -1,14 +1,21 @@
-import numpy as np
-import nibabel
 import matplotlib.pyplot as plt
+import nibabel
+import numpy as np
+
 from tracerdiffusion.data import Voxel_Data
+from tracerdiffusion.utils import cut_to_box
+import pathlib
+
+mask = pathlib.Path("./roi12/parenchyma_mask_roi.mgz")
+if not mask.is_file():
+    raise RuntimeError(f"Could not find {str(mask)}")
 
 
+datapath = pathlib.Path("./data/freesurfer/CONCENTRATIONS2/")
+if not datapath.exists():
+    raise RuntimeError(f"Could not find {str(datapath)}")
 
-mask = "./roi12/parenchyma_mask_roi.mgz"
-datapath="./data/freesurfer/CONCENTRATIONS2/"
-
-if mask.endswith("npy"):
+if mask.suffix == ".npy":
     mask = np.load(mask)
 else:
     mask = nibabel.load(mask).get_fdata().astype(bool)
@@ -19,7 +26,8 @@ time_idx = 1
 # Only load images up to 24 hours after baseline:
 Tmax = 24*6
 
-data = Voxel_Data(datapath=datapath, mask=mask, pixelsizes=[1,1, 1], Tmax=Tmax)
+data = Voxel_Data(datapath=datapath, mask=mask,
+                  pixelsizes=[1, 1, 1], Tmax=Tmax)
 
 
 print("Bounds:", data.bounds())
@@ -30,13 +38,12 @@ inputs, targets = data.sample(n=100)
 # Sample at specific time only for plotting
 inputs, targets = data.sample_image(n=4000, time_idx=time_idx)
 
-# Done - I think this is all you need for the PINNs 
+# Done - I think this is all you need for the PINNs
 
 ##############################################################################################################################
 
-## Below we plot a slice of the data:
+# Below we plot a slice of the data:
 
-from tracerdiffusion.utils import cut_to_box
 
 if len(mask.shape) == 3:
     slice_idx = 133
@@ -48,16 +55,15 @@ if len(mask.shape) == 3:
         exit()
 
 
-
 plt.figure()
-plt.title("Samples from ROI" + " at t=" + format(data.measurement_times()[time_idx]/3600, ".2f") + " hours")
-plt.scatter(inputs[:,1], inputs[:,2], marker="s", c=targets, s=42, vmin=0, vmax=0.1)
-
+plt.title(
+    f"Samples from ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
+plt.scatter(inputs[:, 1], inputs[:, 2], marker="s",
+            c=targets, s=42, vmin=0, vmax=0.1)
 
 
 try:
     image = np.load(data.files[time_idx]) * mask
-    
 except ValueError:
     image = nibabel.load(data.files[time_idx]).get_fdata()
 
@@ -70,7 +76,7 @@ imageslice_roi = np.rot90(imageslice_roi)
 roislice = np.rot90(maskslice)
 
 plt.figure()
-plt.title("Image" + " at t=" + format(data.measurement_times()[time_idx]/3600, ".2f") + " hours")
+plt.title(f"Image at t={data.measurement_times()[time_idx]/3600:.2f} hours")
 plt.imshow(np.rot90(imageslice), vmin=0, vmax=0.1)
 
 
@@ -80,8 +86,8 @@ plt.imshow(np.rot90(roislice), cmap="Reds")
 
 
 plt.figure()
-plt.title("Image cut to ROI" + " at t=" + format(data.measurement_times()[time_idx]/3600, ".2f") + " hours")
+plt.title(
+    f"Image cut to ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
 plt.imshow(imageslice_roi, vmin=0, vmax=0.1)
 
 plt.show()
-
