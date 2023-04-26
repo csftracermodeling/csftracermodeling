@@ -41,9 +41,9 @@ def iter_cb(params):
 
     if len(params) == 1:
         
-        print("Alpha=", format(params[0], ".2e"))
+        print("D_Water=", format(params[0], ".2e"))
     else:
-        print("Alpha=", format(params[0], ".2e"), "r=", format(params[-1], ".2e"))
+        print("D_Water=", format(params[0], ".2e"), "r=", format(params[-1], ".2e"))
         r_during_optim.append(params[1])
         
         r_file.write("," + str(params[1]))
