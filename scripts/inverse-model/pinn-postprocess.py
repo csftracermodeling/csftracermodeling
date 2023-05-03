@@ -52,8 +52,10 @@ if __name__ == "__main__":
     parser.add_argument("--outfolder", required=True,
                         help="""Path to output folder storing the PINN results"""
                         )
-
-    parser.add_argument("--mask", default="./roi/parenchyma_mask_roi.mgz",
+    parser.add_argument("--datapath", required=True,
+                        help="""Path to data folder on which the PINN was trained"""
+                        )
+    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz",
                     help="path to mask from which mesh was made.")
     
 
@@ -65,53 +67,6 @@ if __name__ == "__main__":
         hyperparameters = json.load(data_file)
 
 
-    epochs = np.genfromtxt(parserargs["outfolder"] / "Epoch.txt", delimiter=",")
-
-    files = ["J.txt",  
-             "D.txt",
-             "r.txt"
-             ]
-    labels = [r"PINN Loss $\mathcal{J} = \mathcal{J}_d + \mathcal{J}_p$",
-              "diffusion coefficient $D$ ($10^{-4}$ mm$^2$/s)", 
-              "reaction rate $r$ ($10^{-5}$/s)"
-              ]
-    scales = [1, 1e4, 1e5]
-
-    plotfuns = [plt.semilogy, plt.plot]
-
-    for file, label, scale, plotfun in zip(files, labels, scales, plotfuns):
-        
-        plt.figure()
-        history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
-
-        plotfun(epochs, history * scale)
-        plt.xlabel("Epoch")
-        plt.ylabel(label)
-        plt.tight_layout()
-
-    files = ["J.txt",  
-             "J_d.txt", "J_pde.txt",
-
-             ]
-    labels = [r"$\mathcal{J} = \mathcal{J}_d + w_{pde}\mathcal{J}_{pde}$",
-              r"$\mathcal{J}_d$",
-              r"$\mathcal{J}_{pde}$",
-              ]
-    
-    scales = [1, 1, 1, 1e4, 1e5]
-
-
-    plt.figure()
-    for file, label, scale in zip(files, labels, scales):
-        
-        
-        history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
-
-        plt.semilogy(epochs, history * scale, label=label)
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss during training")
-        plt.legend()
-        plt.tight_layout()
 
 
     ############################################################################################################################
@@ -122,7 +77,7 @@ if __name__ == "__main__":
     slice_idx = 133
     slice_ax = 2
 
-    mask = hyperparameters["mask"]
+    mask = parserargs["mask"]
 
     if mask.endswith("npy"):
         mask = np.load(mask)
@@ -130,7 +85,7 @@ if __name__ == "__main__":
         mask = nibabel.load(mask).get_fdata().astype(bool)
 
 
-    data = Voxel_Data(datapath=hyperparameters["datapath"], mask=mask, pixelsizes=[1,1, 1], Tmax=hyperparameters["Tmax"])
+    data = Voxel_Data(datapath=parserargs["datapath"], mask=mask, pixelsizes=[1,1, 1], Tmax=hyperparameters["Tmax"])
 
     nn = load_nn(parserargs=parserargs, hyperparameters=hyperparameters)
 
@@ -208,7 +163,7 @@ if __name__ == "__main__":
     # Plot the Network prediction
 
     plt.figure()
-    plt.title("NN output" + " at t=" + format(t / 3600, ".2f") + " hours")
+    plt.title("NN output" + " at t=" + format(t, ".2f") + " hours")
     plt.imshow(predslice, vmin=vmin, vmax=vmax)
     plt.colorbar()
 
@@ -228,11 +183,73 @@ if __name__ == "__main__":
 
         nn_nii = nibabel.Nifti1Image(predimg, affine)
 
-        filename = str(parserargs["outfolder"] / ( format(float(tkey) / 3600, ".0f") + "h.mgz"))
+        filename = str(parserargs["outfolder"] / ( format(float(tkey), ".0f") + "h.mgz"))
 
         nibabel.save(nn_nii, filename)
 
         print("Stored", filename)
+
+
+
+
+
+
+
+
+
+    ############################################################################################################################
+    # Print parameters during training
+
+
+
+    epochs = np.genfromtxt(parserargs["outfolder"] / "Epoch.txt", delimiter=",")
+
+    files = ["J.txt",  
+             "D.txt",
+             "r.txt"
+             ]
+    labels = [r"PINN Loss $\mathcal{J} = \mathcal{J}_d + \mathcal{J}_p$",
+              "diffusion coefficient $D$ ($10^{-4}$ mm$^2$/s)", 
+              "reaction rate $r$ ($10^{-5}$/s)"
+              ]
+    scales = [1, 1e4, 1e5]
+
+    plotfuns = [plt.semilogy, plt.plot]
+
+    for file, label, scale, plotfun in zip(files, labels, scales, plotfuns):
+        
+        plt.figure()
+        history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
+
+        plotfun(epochs, history * scale)
+        plt.xlabel("Epoch")
+        plt.ylabel(label)
+        plt.tight_layout()
+
+    files = ["J.txt",  
+             "J_d.txt", "J_pde.txt",
+
+             ]
+    labels = [r"$\mathcal{J} = \mathcal{J}_d + w_{pde}\mathcal{J}_{pde}$",
+              r"$\mathcal{J}_d$",
+              r"$\mathcal{J}_{pde}$",
+              ]
+    
+    scales = [1, 1, 1, 1e4, 1e5]
+
+
+    plt.figure()
+    for file, label, scale in zip(files, labels, scales):
+        
+        
+        history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
+
+        plt.semilogy(epochs, history * scale, label=label)
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss during training")
+        plt.legend()
+        plt.tight_layout()
+
 
     # exit()
     plt.show()
