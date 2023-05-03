@@ -1,6 +1,6 @@
 import h5py
 import argparse
-from tracerdiffusion.fenics2mri import function_to_image
+from tracerdiffusion.utils import function_to_image
 import os
 import dolfin
 import nibabel
@@ -25,10 +25,12 @@ if __name__ == "__main__":
     parserargs["outfolder"] = pathlib.Path(parserargs["hdffile"]).parent
 
     files = ["J.txt", "D.txt", "r.txt"]
-    labels = ["$L^2$-error", "D ($10^{-4}$ mm$^2$/s)", "r ($10^{-5}$/s)"]
-    scales = [1, 1e4, 1e5]
+    labels = ["$L^2$-error", "$D \,(10^{-4}$ mm$^2$/s)", "$r \, (10^{-6}$/s)"]
+    scales = [1, 1e4, 1e6]
 
 
+    fs = 26
+    dpi = 300
 
 
     for file, label, scale in zip(files, labels, scales):
@@ -45,8 +47,12 @@ if __name__ == "__main__":
             print("r final ", format(history[-1] * 3600), "/h")
 
         plt.plot(np.array(range(history.size)), history * scale)
-        plt.xlabel("Iteration")
-        plt.ylabel(label)
+        plt.xlabel("Iteration", fontsize=fs)
+        plt.ylabel(label, fontsize=fs)
+        plt.xticks(fontsize=fs)
+        plt.yticks(fontsize=fs)
+        plt.tight_layout()
+        plt.savefig(str(parserargs["outfolder"] / file).replace(".txt", ".png"), dpi=dpi)
     
     os.makedirs(parserargs["outfolder"], exist_ok=True)
 
@@ -82,6 +88,7 @@ if __name__ == "__main__":
                                             mask = mask,
                                             # mask=template_image
                                             )
+
 
         nibabel.save(function_nii, str(parserargs["outfolder"] / (re.sub("[^0-9]","", key) + "h.mgz")))
 

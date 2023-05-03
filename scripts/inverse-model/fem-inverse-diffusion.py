@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     # alpha = Constant(1)
     
-    r_init = 1e-5
+    r_init = 1e-8
     reaction_rate = Constant(r_init)
 
 
