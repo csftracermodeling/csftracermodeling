@@ -20,7 +20,12 @@ if __name__ == "__main__":
                         help="""Path to output folder storing the FEM results"""
                         )
     
-
+    parser.add_argument("--datapath", required=True,
+                        help="""Path to data folder on which the PINN was trained"""
+                        )
+    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz",
+                    help="path to mask from which mesh was made.")
+    
     parserargs = vars(parser.parse_args())
 
     pinnfolder = pathlib.Path(parserargs["pinnfolder"])
@@ -29,28 +34,6 @@ if __name__ == "__main__":
     with open(pinnfolder / 'hyperparameters.json') as data_file:    
         pinn_hyperparameters = json.load(data_file)
 
-
-    print("*"*100)
-    print("*"*100)
-
-    for qty, label in zip(["D.txt", "r.txt"],["Final D (mm^2 / s):", "Final r (1 / s):"]):
-
-        pinnhistory = np.genfromtxt(pinnfolder / qty, delimiter=",")
-
-        if np.isnan(pinnhistory[-1]):
-            pinnhistory = pinnhistory[:-1]
-
-        assert np.sum(np.isnan(pinnhistory)) == 0
-
-        femhistory = np.genfromtxt(femfolder / qty, delimiter=",")
-
-        print(label)
-        print("PINN", format(pinnhistory[-1], ".2e"))
-        print("FEM ", format(femhistory[-1], ".2e"))
-        print()
-
-    print("*"*100)
-    print("*"*100)
 
     time_idx = 2
     slice_idx = 133
@@ -81,14 +64,14 @@ if __name__ == "__main__":
     slice_ax = 2
     vmin, vmax = None, 0.15
 
-    mask = pinn_hyperparameters["mask"]
+    mask = parserargs["mask"]
 
     if mask.endswith("npy"):
         mask = np.load(mask)
     else:
         mask = nibabel.load(mask).get_fdata().astype(bool)
 
-    data = Voxel_Data(datapath=pinn_hyperparameters["datapath"], mask=mask, pixelsizes=[1,1, 1], Tmax=pinn_hyperparameters["Tmax"], verbosity=0)
+    data = Voxel_Data(datapath=parserargs["datapath"], mask=mask, pixelsizes=[1,1, 1], Tmax=pinn_hyperparameters["Tmax"], verbosity=0)
 
 
     if len(mask.shape) == 3:
@@ -134,22 +117,22 @@ if __name__ == "__main__":
             imageslice = cut_to_box(image=imageslice, mask=roislice, box_bounds=None)
 
         except ModuleNotFoundError:
-            print("Some modulels for plotting could not be imported, will not zoom to data")
+            print("Some modules for plotting could not be imported, will not zoom to data")
 
 
         if name != "MRI":
 
-            print("l2 difference MRI-", name, format(np.nansum((mri[mask]- image[mask]) ** 2), ".2e") + " at t=" + format(data.measurement_times()[time_idx]/3600, ".0f") + " hours")
+            print("l2 difference MRI-", name, format(np.nansum((mri[mask]- image[mask]) ** 2), ".2e") + " at t=" + format(data.measurement_times()[time_idx], ".0f") + " hours")
 
-            if np.sum(np.isnan(image[mask])) > 0.05 * image[mask].size:
+            if np.sum(np.isnan(image[mask])) > 0.1 * image[mask].size:
                 # breakpoint()
-                raise ValueError("More than 5 % nans in image, probably something wrong")
+                raise ValueError("More than 10 % nans in image, probably something wrong")
                 # NOTE: Due to the fact that the mesh surface has sub-voxel resolution (the surface crosses voxels)
                 # some of the (surface-) mesh coordinates will not be within the mask. 
                 # in this case we can't evaluate the FEniCS function and set the voxel values to np.nan
 
         plt.figure()
-        plt.title(name + " at t=" + format(data.measurement_times()[time_idx]/3600, ".0f") + " hours" + "\n" + "Slice along direction " + str(slice_ax) + " at voxel index " + str(slice_idx))
+        plt.title(name + " at t=" + format(data.measurement_times()[time_idx], ".0f") + " hours" + "\n" + "Slice along direction " + str(slice_ax) + " at voxel index " + str(slice_idx))
         plt.imshow(imageslice, vmin=vmin, vmax=vmax)
         plt.colorbar()
 

@@ -1,19 +1,14 @@
-import h5py
 import argparse
-from tracerdiffusion.utils import function_to_image
 import os
-import dolfin
-import nibabel
 import numpy as np
 import pathlib
 import matplotlib.pyplot as plt
-import re
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hdffile", required=True,
-                        help="""Path to hdf file storing the simulation results"""
+    parser.add_argument("--outfolder", required=True,
+                        help="""Path to hdf folder storing the simulation results"""
                         )
 
     parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz", required=True,
@@ -22,7 +17,7 @@ if __name__ == "__main__":
 
     parserargs = vars(parser.parse_args())
 
-    parserargs["outfolder"] = pathlib.Path(parserargs["hdffile"]).parent
+    parserargs["outfolder"] = pathlib.Path(parserargs["outfolder"])
 
     files = ["J.txt", "D.txt", "r.txt"]
     labels = ["$L^2$-error", "$D \,(10^{-4}$ mm$^2$/s)", "$r \, (10^{-6}$/s)"]
@@ -55,48 +50,3 @@ if __name__ == "__main__":
         plt.savefig(str(parserargs["outfolder"] / file).replace(".txt", ".png"), dpi=dpi)
     
     os.makedirs(parserargs["outfolder"], exist_ok=True)
-
-    template_image = nibabel.load(parserargs["mask"])
-
-    mask = template_image.get_fdata()
-
-    hdffile = parserargs["hdffile"]
-
-    assert os.path.isfile(hdffile)
-    assert str(hdffile).endswith(".hdf")
-
-
-    f = h5py.File(hdffile, 'r')
-    print(list(f.keys()))
-
-    roimesh= dolfin.Mesh()
-    hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
-    hdf.read(roimesh, "/mesh", False)
-    
-    V = dolfin.FunctionSpace(roimesh, "CG", 1)
-
-
-    for key in list(f.keys()):
-        if key == "mesh":
-            continue
-
-        u = dolfin.Function(V)
-
-        hdf.read(u, key)
-
-        function_nii, _ = function_to_image(function=u, template_image=template_image, extrapolation_value=np.nan, 
-                                            mask = mask,
-                                            # mask=template_image
-                                            )
-
-
-        nibabel.save(function_nii, str(parserargs["outfolder"] / (re.sub("[^0-9]","", key) + "h.mgz")))
-
-    hdf.close()
-
-
-    plt.show()
-
-    # function_to_image()
-    # 
-

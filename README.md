@@ -35,6 +35,7 @@ and should be put into the top level in your cloned reposity under `/data/` as:
 ├──roi12
     ├──parenchyma_mask_roi.mgz
     ├──parenchyma_mask_boundary.mgz
+    ├──parenchyma_mask_roi12.xml
 ```
 
 # Setup
@@ -50,9 +51,12 @@ pip install -e .
 export WORKDIR=./data/freesurfer/
 ```
 
+For jax/PINNs scripts, run in terminal:
 
-
-For Jax PINN scripts, run
 ```
-$ python scripts/inverse-model/pinn-inverse-diffusion.py
+git clone https://github.com/bzapf/tracerdiffusion.git
+cd tracerdiffusion
+conda env create -f jax.yml
+conda activate jax
+pip install -e .
 ```

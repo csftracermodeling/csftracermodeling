@@ -23,6 +23,9 @@ if __name__ == "__main__":
                         help="""Path to folder where the masked images are stored. Will be imagefolder_MASKED by default"""
                         )
     
+    parser.add_argument("--overwrite", action="store_true", default=False, 
+                        help="Overwrite --outputfolder")
+    
 
     parserargs = vars(parser.parse_args())
 
@@ -33,7 +36,13 @@ if __name__ == "__main__":
     else:
         outputfolder = pathlib.Path(parserargs["outputfolder"])
 
-    os.makedirs(outputfolder, exist_ok=True)
+    if os.path.isdir(outputfolder) and len(os.listdir(outputfolder)) > 1:
+        print("--outputfolder", str(outputfolder), "exists, exiting script. Use --overwrite to re-do the masking.")
+
+        if not parserargs["overwrite"]:
+           exit()
+
+    os.makedirs(outputfolder)
 
     mask = pathlib.Path(parserargs["mask"])
 

@@ -153,94 +153,96 @@ class Nan_Filter():
 
         return filtered_data
 
+try:
 
-def read_image(filename: str, functionspace: FunctionSpace, mask: numpy.ndarray = None) -> Function:
-    """ Read MRI data to FEniCS mesh
+    def read_image(filename: str, functionspace: FunctionSpace, mask: numpy.ndarray = None) -> Function:
+        """ Read MRI data to FEniCS mesh
 
-    Args:
-        filename (str): Path to MRI as .mgz file
-        functionspace (FunctionSpace): FEniCS FunctionSpace on which the image will be represented
-        mask (numpy.ndarray, optional): Can be used to define a filter that replaces nan voxels with the median value 
-                                        of adjacent voxels that are in the mask. This is useful because the mesh has
-                                        sub-voxel resolution and sometimes mesh vertices might correspond to a voxel 
-                                        that is not inside the region where the MRI contains valid data. 
-                                        An example is MRI containing CSF tracer concentration, which sometimes can
-                                        only be computed in the brain but not the CSF.  
-                                        Defaults to None.
+        Args:
+            filename (str): Path to MRI as .mgz file
+            functionspace (FunctionSpace): FEniCS FunctionSpace on which the image will be represented
+            mask (numpy.ndarray, optional): Can be used to define a filter that replaces nan voxels with the median value 
+                                            of adjacent voxels that are in the mask. This is useful because the mesh has
+                                            sub-voxel resolution and sometimes mesh vertices might correspond to a voxel 
+                                            that is not inside the region where the MRI contains valid data. 
+                                            An example is MRI containing CSF tracer concentration, which sometimes can
+                                            only be computed in the brain but not the CSF.  
+                                            Defaults to None.
 
-    Raises:
-        NotImplementedError: Currently only works for 3-D meshes, not slices.
+        Raises:
+            NotImplementedError: Currently only works for 3-D meshes, not slices.
 
-    Returns:
-        Function: FEniCS function representing the MRI
-    """
-    
-    print("Loading", filename)
-    if filename.endswith(".mgz"):
-        mri_volume = nibabel.load(filename)
-        voxeldata = mri_volume.get_fdata()
-
-
-    if mask is not None:
+        Returns:
+            Function: FEniCS function representing the MRI
+        """
         
-        if isinstance(mask, str):
-            mask = nibabel.load(mask).get_fdata()
-
-        voxeldata = numpy.where(mask, voxeldata, numpy.nan)
-
-        nanfilter = Nan_Filter(mask)
-
-    c_data = Function(functionspace)
-    ras2vox_tkr_inv = numpy.linalg.inv(mri_volume.header.get_vox2ras_tkr())
-
-    xyz = functionspace.tabulate_dof_coordinates()
+        print("Loading", filename)
+        if filename.endswith(".mgz"):
+            mri_volume = nibabel.load(filename)
+            voxeldata = mri_volume.get_fdata()
 
 
-    
-    if functionspace.mesh().topology().dim() == 2:
+        if mask is not None:
+            
+            if isinstance(mask, str):
+                mask = nibabel.load(mask).get_fdata()
 
-        raise NotImplementedError()
+            voxeldata = numpy.where(mask, voxeldata, numpy.nan)
 
-        assert len(slice_params) > 0    
-    
-        assert numpy.sum(numpy.abs(slice_params["slice_normal"])) == 1
+            nanfilter = Nan_Filter(mask)
 
-        xyz2 = numpy.insert(xyz, numpy.argmax(numpy.abs(slice_params["slice_normal"])), 
-                        -16, # - slice_params["offset"] - 19.3500, # -17.9447, 
-                        axis=1)
+        c_data = Function(functionspace)
+        ras2vox_tkr_inv = numpy.linalg.inv(mri_volume.header.get_vox2ras_tkr())
+
+        xyz = functionspace.tabulate_dof_coordinates()
+
+
         
-        # # TODO FIXME
-        # # why do I need to compute * (-1) ?? 
-        # xyz2[:, -1] *= -1
-        # breakpoint()
-        # TODO FIXME
+        if functionspace.mesh().topology().dim() == 2:
 
-    else:
-        xyz2 = xyz
-    
-    ijk = apply_affine(ras2vox_tkr_inv, xyz2).T
-    i, j, k = numpy.rint(ijk).astype("int")
+            raise NotImplementedError()
 
-    if mask is not None:
-        voxeldata = nanfilter(voxeldata, ijk, i, j, k)
-    
+            assert len(slice_params) > 0    
+        
+            assert numpy.sum(numpy.abs(slice_params["slice_normal"])) == 1
 
-    if numpy.where(numpy.isnan(voxeldata[i, j, k]), 1,0).sum() > 0:
-        print("Setting", numpy.where(numpy.isnan(voxeldata[i, j, k]), 1, 0).sum(), "/", i.size, " nan voxels to 0")
-        voxeldata[i, j, k] = numpy.where(numpy.isnan(voxeldata[i, j, k]), 0, voxeldata[i, j, k])
-    if numpy.where(voxeldata[i, j, k] < 0, 1,0).sum() > 0:
-        print("", numpy.where(voxeldata[i, j, k] < 0, 1, 0).sum(), "/", i.size, " voxels in mesh have value < 0, thresholding to 0")
-        voxeldata[i, j, k] = numpy.where(voxeldata[i, j, k] < 0, 0, voxeldata[i, j, k])
+            xyz2 = numpy.insert(xyz, numpy.argmax(numpy.abs(slice_params["slice_normal"])), 
+                            -16, # - slice_params["offset"] - 19.3500, # -17.9447, 
+                            axis=1)
+            
+            # # TODO FIXME
+            # # why do I need to compute * (-1) ?? 
+            # xyz2[:, -1] *= -1
+            # breakpoint()
+            # TODO FIXME
 
-    c_data.vector()[:] = voxeldata[i, j, k]
+        else:
+            xyz2 = xyz
+        
+        ijk = apply_affine(ras2vox_tkr_inv, xyz2).T
+        i, j, k = numpy.rint(ijk).astype("int")
 
-    # Compute total tracer information, note that factor 1e-6 is needed since concentration is mmol/L and mesh unit is mm
-    # print("In", filename, format(numpy.nansum(voxeldata[i, j, k]) * 1e-6,".1e"), "mmol tracer in region defined by mesh" )
-    print("In", filename, format(assemble(c_data * dx) * 1e-6,".1e"), "mmol tracer in region defined by mesh" )
+        if mask is not None:
+            voxeldata = nanfilter(voxeldata, ijk, i, j, k)
+        
+
+        if numpy.where(numpy.isnan(voxeldata[i, j, k]), 1,0).sum() > 0:
+            print("Setting", numpy.where(numpy.isnan(voxeldata[i, j, k]), 1, 0).sum(), "/", i.size, " nan voxels to 0")
+            voxeldata[i, j, k] = numpy.where(numpy.isnan(voxeldata[i, j, k]), 0, voxeldata[i, j, k])
+        if numpy.where(voxeldata[i, j, k] < 0, 1,0).sum() > 0:
+            print("", numpy.where(voxeldata[i, j, k] < 0, 1, 0).sum(), "/", i.size, " voxels in mesh have value < 0, thresholding to 0")
+            voxeldata[i, j, k] = numpy.where(voxeldata[i, j, k] < 0, 0, voxeldata[i, j, k])
+
+        c_data.vector()[:] = voxeldata[i, j, k]
+
+        # Compute total tracer information, note that factor 1e-6 is needed since concentration is mmol/L and mesh unit is mm
+        # print("In", filename, format(numpy.nansum(voxeldata[i, j, k]) * 1e-6,".1e"), "mmol tracer in region defined by mesh" )
+        print("In", filename, format(assemble(c_data * dx) * 1e-6,".1e"), "mmol tracer in region defined by mesh" )
 
 
-    return c_data
-
+        return c_data
+except NameError:
+    pass
 
 class MRI_Data(abc.ABC):
 
@@ -255,17 +257,16 @@ class MRI_Data(abc.ABC):
         
         self.verbosity = verbosity
 
-        self.files = sorted([self.datapath / x for x in os.listdir(self.datapath) if "template" not in x], 
+        files = sorted([self.datapath / x for x in os.listdir(self.datapath) if "template" not in x], 
                             key=lambda x: float(pathlib.Path(x).stem))
+        
+        self.files = [x for x in files if str(x).endswith(".mgz") or str(x).endswith(".nii") or str(x).endswith(".nii.gz")]
 
         self.measurements = {}
         self.time_filename_mapping = {}
 
         for filename in self.files:
 
-            if not str(filename).endswith(".mgz"):
-                print("Exluding ", filename, "since it is not an MRI volume.")
-                continue
 
             dt = float(filename.stem) 
             # Obsolete version where concentrations were named as YYYYMMDD_HHMMSS.mgz

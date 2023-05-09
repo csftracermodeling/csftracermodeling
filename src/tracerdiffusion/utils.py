@@ -47,7 +47,9 @@ def function_to_image(function, template_image, extrapolation_value, mask: str =
         print(f"There are {num_voxels_in_mask} voxels in the bounding box")
     else:
 
-        mask = nibabel.load(mask).get_fdata()
+        if not isinstance(mask, np.ndarray):
+
+            mask = nibabel.load(mask).get_fdata()
 
         if np.isnan(mask).sum() > 0:
             # The mask is defined by the voxels that are not nan

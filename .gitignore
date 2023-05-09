@@ -10,17 +10,20 @@
 *.stl
 simulation_outputs/
 data/
-
+*roi*.txt
+do.sh
 roi6/
 roi20/
 roi28/
 roi12/
 fenics-env2.yml
-
+scripts/inverse-model/read-results.py
+scripts/inverse-model/open-images.sh
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
 
 # C extensions
 *.so
