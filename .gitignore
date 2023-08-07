@@ -15,7 +15,7 @@ do.sh
 roi6/
 roi20/
 roi28/
-roi12/
+#roi12/
 fenics-env2.yml
 scripts/inverse-model/read-results.py
 scripts/inverse-model/open-images.sh
@@ -24,6 +24,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+roi12/*
+!roi12/parenchyma_mask_roi12.xml
 
 # C extensions
 *.so
