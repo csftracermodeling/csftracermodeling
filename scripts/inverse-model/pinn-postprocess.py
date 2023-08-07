@@ -191,8 +191,20 @@ if __name__ == "__main__":
 
 
 
+    # We can also evaluate the NN at a time where no data is available, example: at 42 h
+    t_xyz[:, 0] = 42
 
+    pred = nn(t_xyz)
 
+    predimg[mask] = pred
+
+    nn_nii = nibabel.Nifti1Image(predimg, affine)
+
+    filename = str(parserargs["outfolder"] /  "42h.mgz")
+
+    nibabel.save(nn_nii, filename)
+
+    print("Stored", filename)
 
 
 

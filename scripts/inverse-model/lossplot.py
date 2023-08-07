@@ -3,6 +3,10 @@ import os
 import numpy as np
 import pathlib
 import matplotlib.pyplot as plt
+from matplotlib import rc
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
+plt.rcParams.update({'font.size': 30})
 
 if __name__ == "__main__":
 
@@ -11,8 +15,8 @@ if __name__ == "__main__":
                         help="""Path to hdf folder storing the simulation results"""
                         )
 
-    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz", required=True,
-                    help="path to mask from which mesh was made.")
+    parser.add_argument("--mask", required=True,
+                    help="path to mask from which mesh was made, e.g., ./roi12/parenchyma_mask_roi.mgz")
     
 
     parserargs = vars(parser.parse_args())
@@ -24,8 +28,8 @@ if __name__ == "__main__":
     scales = [1, 1e4, 1e6]
 
 
-    fs = 26
-    dpi = 300
+    fs = None # 30
+    dpi = None # 300
 
 
     for file, label, scale in zip(files, labels, scales):

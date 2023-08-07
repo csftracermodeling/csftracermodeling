@@ -273,6 +273,10 @@ class Model(object):
         # u_prev.rename("simulation", "simulation    ")
         # pvdfile << u_prev
 
+
+        movie_hdf = HDF5File(self.V.mesh().mpi_comm(), str(self.outfolder / "movie.hdf"), "w")
+        movie_hdf.write(self.V.mesh(), "mesh")
+        
         if config.inverse:
             self.simulated_tracer.append(u_prev.copy(deepcopy=True, annotate=False))
         else:
@@ -344,6 +348,7 @@ class Model(object):
 
             u_prev.rename("simulation", "simulation")
             pvdfile << u_prev
+            movie_hdf.write(u_prev, format(self.t / 3600, ".1f"))
 
             u_prev.assign(u_next)
             
@@ -378,7 +383,7 @@ class Model(object):
         u_prev.rename("simulation", "simulation")
         pvdfile << u_prev
 
-
+        movie_hdf.write(u_prev, format(self.t / 3600, ".1f"))
 
         print("Done with simulation")
 

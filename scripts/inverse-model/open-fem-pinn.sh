@@ -24,17 +24,19 @@ BASELINE_IMAGE=./data/freesurfer/REGISTERED/20230213_073508.mgz
 DATA7H=data/freesurfer/MASKED_CONCENTRATIONS/6.56
 DATA50H=data/freesurfer/MASKED_CONCENTRATIONS/50.39
 
-FEMPATH=./simulation_outputs/3600_roi12
+FEMPATH=./simulation_outputs/3600_12
 
 FEM7h=${FEMPATH}/7h
+FEM42h=${FEMPATH}/42h
 FEM50h=${FEMPATH}/50h
 
-PINNPATH=./simulation_outputs/pinn1e-3
+PINNPATH=./simulation_outputs/pinn1e3
 PINN7h=${PINNPATH}/7h
+PINN42h=${PINNPATH}/42h
 PINN50h=${PINNPATH}/50h
 
 
-for IMAGE in $DATA7H $DATA50H $FEM7h $FEM50h $PINN7h $PINN50h
+for IMAGE in $DATA7H $DATA50H $FEM7h $FEM50h $PINN7h $PINN50h $FEM42h $PINN42h
 do
 echo $IMAGE
 freeview --slice 146 100 133 ${BASELINE_IMAGE} --colormap Jet -v ${IMAGE}.mgz --zoom 4  \

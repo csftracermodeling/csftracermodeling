@@ -61,7 +61,7 @@ if __name__ == "__main__":
     
     parser.add_argument("--outfolder", default="./simulation_outputs/")
     parser.add_argument("--lbfgs_iters", default=42)
-    parser.add_argument("--dt", default=3600, type=float, help="timestep size")
+    parser.add_argument("--dt", default=3600, type=float, help="timestep size in seconds")
     parser.add_argument("--taylortest", default=False, action="store_true", help="Run Taylor test to check if gradients are correct.")
 
     
@@ -70,9 +70,19 @@ if __name__ == "__main__":
 
     outfolder = pathlib.Path(parserargs["outfolder"])
     if outfolder.is_dir():
-        print("Deleting existing outputfolder", outfolder)
-        shutil.rmtree(outfolder)
+        print("Output folder ", outfolder, "exists, delete it?")
+        print("WARNING: This will remove all sub-folders")
+        answer = None
+        while answer not in ["y", "n"]:
+            answer = input("Delete ? Type either of [y, n]:").lower()
 
+        if answer == "y":   
+
+            shutil.rmtree(outfolder)
+
+        else:
+            print("Exiting script")
+            exit()
     os.makedirs(outfolder, exist_ok=True)
 
     datapath = pathlib.Path(parserargs["data"])

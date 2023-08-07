@@ -9,13 +9,20 @@ import pathlib
 import matplotlib.pyplot as plt
 import re
 
+from matplotlib import rc
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
+plt.rcParams.update({'font.size': 30})
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--hdffile", required=True,
-                        help="""Path to hdf file storing the simulation results"""
+                        help="""Path to hdf file storing the simulation results where data is availabe"""
                         )
-
+    parser.add_argument("--moviefile", required=True,
+                        help="""Path to hdf file storing the simulation results at all times"""
+                        )
     parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz", required=True,
                     help="path to mask from which mesh was made.")
     
@@ -29,7 +36,7 @@ if __name__ == "__main__":
     scales = [1, 1e4, 1e6]
 
 
-    fs = 26
+    fs = None # 26
     dpi = 300
 
 
@@ -97,6 +104,33 @@ if __name__ == "__main__":
 
     plt.show()
 
-    # function_to_image()
-    # 
+    # We load the prediction at 42 hours (no data available)
 
+    hdffile = parserargs["moviefile"]
+
+    assert os.path.isfile(hdffile)
+    assert str(hdffile).endswith(".hdf")
+
+
+    f = h5py.File(hdffile, 'r')
+    print(list(f.keys()))
+
+    roimesh= dolfin.Mesh()
+    hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
+    hdf.read(roimesh, "/mesh", False)
+    
+    V = dolfin.FunctionSpace(roimesh, "CG", 1)
+
+    u = dolfin.Function(V)
+
+    hdf.read(u, "42.0")
+
+    function_nii, _ = function_to_image(function=u, template_image=template_image, extrapolation_value=np.nan, 
+                                        mask = mask,
+                                        # mask=template_image
+                                        )
+
+
+    nibabel.save(function_nii, str(parserargs["outfolder"] / "42h.mgz"))
+
+    hdf.close()
