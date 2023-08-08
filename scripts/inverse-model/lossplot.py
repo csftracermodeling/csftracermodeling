@@ -1,9 +1,11 @@
 import argparse
 import os
-import numpy as np
 import pathlib
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import rc
+
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 plt.rcParams.update({'font.size': 30})

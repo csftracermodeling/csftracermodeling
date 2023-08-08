@@ -13,18 +13,12 @@ from fenics_adjoint import *
 from pyadjoint.reduced_functional_numpy import ReducedFunctionalNumPy
 
 import pathlib
-import os
 import shutil
 import numpy
 import argparse
 from tracerdiffusion.data import FEniCS_Data
 import json
 import nibabel
-
-
-
-
-
 
 
 def iter_cb(params):
@@ -83,15 +77,15 @@ if __name__ == "__main__":
         else:
             print("Exiting script")
             exit()
-    os.makedirs(outfolder, exist_ok=True)
+    outfolder.mkdir(exist_ok=True, parents=True)
 
     datapath = pathlib.Path(parserargs["data"])
     
-    meshpath =  parserargs["mesh"]
+    meshpath = pathlib.Path(parserargs["mesh"])
 
-    assert os.path.isfile(meshpath)
+    assert meshpath.is_file()
 
-    brainmesh = Mesh(meshpath)
+    brainmesh = Mesh(str(meshpath))
 
     print("Some info on your mesh:")
     print("(hmin, hmax) = (", brainmesh.hmin(), brainmesh.hmax() ,")")
@@ -103,7 +97,7 @@ if __name__ == "__main__":
 
     assert min(MeshQuality.radius_ratio_min_max(brainmesh)) > 1e-6, "Mesh contains degenerated cells"
 
-    V = FunctionSpace(brainmesh, "CG", 1)
+    V = FunctionSpace(brainmesh, "Lagrange", 1)
 
     # md = (0.00092582074369026 + 0.000867643624860488) / 2
 

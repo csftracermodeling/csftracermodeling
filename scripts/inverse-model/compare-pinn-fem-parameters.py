@@ -1,14 +1,8 @@
 import argparse
-import os
-import nibabel
-import numpy as np
-import pathlib
 import json
-import matplotlib.pyplot as plt
-from tracerdiffusion.data import Voxel_Data
-import pickle
-from tracerdiffusion.utils import cut_to_box
+import pathlib
 
+import numpy as np
 
 if __name__ == "__main__":
 

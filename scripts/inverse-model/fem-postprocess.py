@@ -1,15 +1,16 @@
-import h5py
 import argparse
-from tracerdiffusion.utils import function_to_image
-import os
-import dolfin
-import nibabel
-import numpy as np
 import pathlib
-import matplotlib.pyplot as plt
 import re
 
+import dolfin
+import h5py
+import matplotlib.pyplot as plt
+import nibabel
+import numpy as np
 from matplotlib import rc
+
+from tracerdiffusion.utils import function_to_image
+
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 plt.rcParams.update({'font.size': 30})
@@ -41,9 +42,6 @@ if __name__ == "__main__":
 
 
     for file, label, scale in zip(files, labels, scales):
-        
-
-
         plt.figure()
         history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
         if file == "D.txt":
@@ -59,18 +57,16 @@ if __name__ == "__main__":
         plt.xticks(fontsize=fs)
         plt.yticks(fontsize=fs)
         plt.tight_layout()
-        plt.savefig(str(parserargs["outfolder"] / file).replace(".txt", ".png"), dpi=dpi)
-    
-    os.makedirs(parserargs["outfolder"], exist_ok=True)
+        plt.savefig(str((parserargs["outfolder"] / file).with_suffix(".png")), dpi=dpi)
+    parserargs["outfolder"].mkdir(exist_ok=True, parents=True)
 
     template_image = nibabel.load(parserargs["mask"])
 
     mask = template_image.get_fdata()
 
-    hdffile = parserargs["hdffile"]
-
-    assert os.path.isfile(hdffile)
-    assert str(hdffile).endswith(".hdf")
+    hdffile = pathlib.Path(parserargs["hdffile"])
+    assert hdffile.is_file()
+    assert hdffile.suffix == ".hdf"
 
 
     f = h5py.File(hdffile, 'r')
@@ -80,7 +76,7 @@ if __name__ == "__main__":
     hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
     hdf.read(roimesh, "/mesh", False)
     
-    V = dolfin.FunctionSpace(roimesh, "CG", 1)
+    V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
 
 
     for key in list(f.keys()):
@@ -106,10 +102,10 @@ if __name__ == "__main__":
 
     # We load the prediction at 42 hours (no data available)
 
-    hdffile = parserargs["moviefile"]
+    hdffile = pathlib.Path(parserargs["moviefile"])
 
-    assert os.path.isfile(hdffile)
-    assert str(hdffile).endswith(".hdf")
+    assert hdffile.is_file()
+    assert hdffile.suffix == ".hdf"
 
 
     f = h5py.File(hdffile, 'r')
@@ -119,18 +115,16 @@ if __name__ == "__main__":
     hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
     hdf.read(roimesh, "/mesh", False)
     
-    V = dolfin.FunctionSpace(roimesh, "CG", 1)
+    V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
 
     u = dolfin.Function(V)
 
     hdf.read(u, "42.0")
+    hdf.close()
 
     function_nii, _ = function_to_image(function=u, template_image=template_image, extrapolation_value=np.nan, 
                                         mask = mask,
                                         # mask=template_image
                                         )
-
-
     nibabel.save(function_nii, str(parserargs["outfolder"] / "42h.mgz"))
 
-    hdf.close()

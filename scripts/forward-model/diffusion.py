@@ -49,7 +49,7 @@ if __name__ == "__main__":
             print("No subdomains found")
             dx_SD = None
     
-    V = FunctionSpace(brainmesh, "CG", 1)
+    V = FunctionSpace(brainmesh, "Lagrange", 1)
     mean_diffusivitySpace = FunctionSpace(brainmesh, 'DG', 0)
 
 

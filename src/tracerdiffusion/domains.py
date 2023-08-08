@@ -3,7 +3,7 @@ import numpy as np
 
 
 from abc import ABC, abstractmethod
-from tracerdiffusion.utils import make_coordinate_grid, init_collocation_points
+from tracerdiffusion.utils import make_coordinate_grid
 
 class Domain(ABC):
     

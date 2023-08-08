@@ -8,13 +8,9 @@ else:
     print("config.inverse = False, not importing dolfin-adjoint")
 
 import pathlib
-import os
 import numpy as np
 import json
-# from measurements import MRI_Measurements
-from tracerdiffusion.data import FEniCS_Data as MRI_Measurements
 from tqdm import tqdm
-import argparse
 
 
 class Model(object):
