@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     meshresolution = parserargs["resolution"]
     
-    outfolder = pathlib.Path(os.getcwd()) / ("roi" + str(meshresolution) + "/")
+    outfolder = pathlib.Path.cwd() / ("roi" + str(meshresolution) + "/")
 
     if outfolder.is_dir():
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
             print("Deleting existing outputfolder", outfolder)
             shutil.rmtree(outfolder)
 
-    os.makedirs(outfolder, exist_ok=True)
+    outfolder.mkdir(exist_ok=True, parents=True)
 
     maskfile = pathlib.Path(parserargs["maskfile"])
 

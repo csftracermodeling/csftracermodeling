@@ -19,7 +19,7 @@ if __name__ == "__main__":
                         help="Name of function inside the HDF5 file")
     parser.add_argument("--output", required=True, type=str,
                         help="MRI file to save the function to (e.g. shear_modulus.nii)")
-    parser.add_argument("--function_space", type=str, default="CG")
+    parser.add_argument("--function_space", type=str, default="Lagrange")
     parser.add_argument("--function_degree", type=int, default=1)
     parser.add_argument("--extrapolation_value",
                         type=float, default=float('nan'))

@@ -16,8 +16,6 @@ from nibabel.affines import apply_affine
 import os
 from datetime import datetime
 import abc
-import matplotlib.pyplot as plt
-from scipy import ndimage
 from parse import parse
 
 TMAX_HOURS = 4 * 24 * 60 * 60

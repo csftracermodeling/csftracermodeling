@@ -1,14 +1,14 @@
 import argparse
+import json
 import os
+import pathlib
+
+import matplotlib.pyplot as plt
 import nibabel
 import numpy as np
-import pathlib
-import json
-import matplotlib.pyplot as plt
-from tracerdiffusion.data import Voxel_Data
-import pickle
-from tracerdiffusion.utils import cut_to_box
 
+from tracerdiffusion.data import Voxel_Data
+from tracerdiffusion.utils import cut_to_box
 
 if __name__ == "__main__":
 
@@ -125,7 +125,6 @@ if __name__ == "__main__":
             print("l2 difference MRI-", name, format(np.nansum((mri[mask]- image[mask]) ** 2), ".2e") + " at t=" + format(data.measurement_times()[time_idx], ".0f") + " hours")
 
             if np.sum(np.isnan(image[mask])) > 0.1 * image[mask].size:
-                # breakpoint()
                 raise ValueError("More than 10 % nans in image, probably something wrong")
                 # NOTE: Due to the fact that the mesh surface has sub-voxel resolution (the surface crosses voxels)
                 # some of the (surface-) mesh coordinates will not be within the mask. 

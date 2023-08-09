@@ -42,21 +42,21 @@ and should be put into the top level in your cloned reposity under `/data/` as:
 
 For FEniCS scripts and data processing, run in terminal:
 
-```
+```bash
 git clone https://github.com/bzapf/tracerdiffusion.git
 cd tracerdiffusion
 conda env create -f fenics-env.yml
 conda activate diffusion-fenics-env
-pip install -e .
+python3 -m pip install -e .
 export WORKDIR=./data/freesurfer/
 ```
 
 For jax/PINNs scripts, run in terminal:
 
-```
+```bash
 git clone https://github.com/bzapf/tracerdiffusion.git
 cd tracerdiffusion
 conda env create -f jax.yml
 conda activate jax
-pip install -e .
+python3 -m pip install -e .
 ```
