@@ -23,6 +23,7 @@ scripts/inverse-model/open-images.sh
 __pycache__/
 *.py[cod]
 *$py.class
+*.txt
 
 roi12/*
 !roi12/parenchyma_mask_roi12.xml

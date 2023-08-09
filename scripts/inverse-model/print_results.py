@@ -8,10 +8,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--outfolder", required=True,
-                        help="""Path to hdf folder storing the simulation results"""
+                        help="Path to hdf folder storing the simulation results. " \
+                        + "Assumes that the folders are named like outfolder/3600_12/ for timestep 3600 s and mesh resolution 12" \
+                        + ". Further, it assumes that the PINN results are in folders like for example outfolder/pinn1e2/ for pde weight 1e2 "
                         )
     parser.add_argument("--datafolder", default="./data/freesurfer/CONCENTRATIONS/",
-                        help="""Path to hdf folder storing the simulation results"""
+                        help="""Path to hdf folder storing the input data, needed to convert to mgz"""
                         )
     parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz",
                     help="""Path to mask mgz file in which the error will be computed"""
@@ -73,9 +75,6 @@ if __name__ == "__main__":
             if "pinn" in str(subfolder):
                 r = r / 3600
 
-
-            D *= 1e4
-
             r *= 1e6
 
 
@@ -86,19 +85,39 @@ if __name__ == "__main__":
 
         #### Load data and predictions
 
+        error = 0
+        norm = 0
+
         for key, conc_mri in data.items():
             
-            try:
-                conc_pred = nibabel.load(outfolder / subfolder / (str(key) + "h.mgz")).get_fdata()
+            conc_pred = None
+            
+            # Depending on the time step size, the predictions are stored at +- 1 h compared to imaging time (round-off)
+            # Hence we check if an prediction image is available one hour before or after the mri
+            for dt in [0, -1, 1]:
+                try:
+                    conc_pred = nibabel.load(outfolder / subfolder / (str(key + dt) + "h.mgz")).get_fdata()
 
-                conc_pred = mask * conc_pred
+                    conc_pred = mask * conc_pred
+                    
+                    break
+                
+                except FileNotFoundError:
+                    continue
 
-            except FileNotFoundError:
+            if conc_pred is None:
+
                 print(outfolder, subfolder, "has no images? Either not done or you have to run postprocess script")
                 print("continue")
                 continue
 
-
-            print(np.nansum((conc_mri-conc_pred)) ** 2 )
-
-        print(format(D, ".2f"), "(1e4 mm^2 / s)", format(r, ".2f"), "(1e-6 1 / s)")
+            # L2 errors:
+            # TODO
+            e = np.nansum((conc_mri-conc_pred)) ** 2
+            n = np.nansum((conc_mri)) ** 2
+            
+            error += e
+            norm += n
+        l2_error = (error / norm) ** (1 / 2)
+        
+        print(format(D, ".2f"), "(1e4 mm^2 / s)", format(r, ".2f"), "(1e-6 1 / s)", "L2 error", format(l2_error, ".3e"))

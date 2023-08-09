@@ -73,7 +73,7 @@ if __name__ == "__main__":
     print(list(f.keys()))
 
     roimesh= dolfin.Mesh()
-    hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
+    hdf = dolfin.HDF5File(roimesh.mpi_comm(), str(hdffile), "r")
     hdf.read(roimesh, "/mesh", False)
     
     V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
@@ -92,13 +92,14 @@ if __name__ == "__main__":
                                             # mask=template_image
                                             )
 
-
-        nibabel.save(function_nii, str(parserargs["outfolder"] / (re.sub("[^0-9]","", key) + "h.mgz")))
+        filename = str(parserargs["outfolder"] / (re.sub("[^0-9]","", key) + "h.mgz"))
+        print("Stored", filename    )
+        nibabel.save(function_nii, filename)
 
     hdf.close()
 
 
-    plt.show()
+    # plt.show()
 
     # We load the prediction at 42 hours (no data available)
 
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     print(list(f.keys()))
 
     roimesh= dolfin.Mesh()
-    hdf = dolfin.HDF5File(roimesh.mpi_comm(), hdffile, "r")
+    hdf = dolfin.HDF5File(roimesh.mpi_comm(), str(hdffile), "r")
     hdf.read(roimesh, "/mesh", False)
     
     V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
