@@ -3,17 +3,34 @@ import pathlib
 import argparse
 import numpy
 import nibabel
-   
-parser = argparse.ArgumentParser()
-parser.add_argument('-a', '--aseg', required=True, type=str, 
-    help="FreeSurfer segmentation file aseg.mgz")
-parser.add_argument('--maskname', default=None, type=str, 
-    help="Filepath where brain mask should be stored. Will be stored as parenchyma_only.mgz into the folder of aseg.mgz by default.")
 
-parser.add_argument('--t1', default=None, type=float, 
-    help="Set the voxel valuels inside mask to t1 (create synthetic T1 map). Note: the other scripts use units of seconds")
-parser.add_argument('--t1mapname', default=None, type=str, 
-    help="Filepath where the synthetic T1 map should be stored.Will be stored as synthetic_T1_map.mgz into the folder of aseg.mgz by default.")
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-a",
+    "--aseg",
+    required=True,
+    type=str,
+    help="FreeSurfer segmentation file aseg.mgz",
+)
+parser.add_argument(
+    "--maskname",
+    default=None,
+    type=str,
+    help="Filepath where brain mask should be stored. Will be stored as parenchyma_only.mgz into the folder of aseg.mgz by default.",
+)
+
+parser.add_argument(
+    "--t1",
+    default=None,
+    type=float,
+    help="Set the voxel valuels inside mask to t1 (create synthetic T1 map). Note: the other scripts use units of seconds",
+)
+parser.add_argument(
+    "--t1mapname",
+    default=None,
+    type=str,
+    help="Filepath where the synthetic T1 map should be stored.Will be stored as synthetic_T1_map.mgz into the folder of aseg.mgz by default.",
+)
 
 
 parserargs = parser.parse_args()
@@ -33,9 +50,9 @@ aseg = aseg.get_fdata().astype(int)
 csf_mask = numpy.zeros(tuple(aseg.shape), dtype=bool)
 
 for csf_label in csf_labels:
-    csf_mask += (aseg == csf_label) 
+    csf_mask += aseg == csf_label
 
-brainmask = (aseg > 0) * (~ csf_mask)
+brainmask = (aseg > 0) * (~csf_mask)
 
 if parserargs["maskname"] is None:
     outfile = pathlib.Path(parserargs["aseg"]).parent / "parenchyma_only.mgz"
@@ -58,5 +75,8 @@ if parserargs["t1"] is not None:
 
     if not pathlib.Path(parserargs["t1mapname"]).parent.is_dir():
         os.makedirs(pathlib.Path(parserargs["t1mapname"]).parent, exist_ok=True)
-        
-    nibabel.save(nibabel.Nifti1Image((brainmask * parserargs["t1"]).astype(float), affine), outfile)
+
+    nibabel.save(
+        nibabel.Nifti1Image((brainmask * parserargs["t1"]).astype(float), affine),
+        outfile,
+    )

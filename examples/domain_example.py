@@ -38,13 +38,32 @@ boundary_samples = potato_boundary.sample(n=100)
 
 fig = plt.figure()
 
-ax = fig.add_subplot(projection='3d')
+ax = fig.add_subplot(projection="3d")
 
-ax.scatter(potato.voxel_center_coordinates[:, 0], potato.voxel_center_coordinates[:, 1], potato.voxel_center_coordinates[:, 2],
-           label="voxel center coordinates", marker="o", facecolors='none', edgecolors='blue')
-ax.scatter(samples[:, 0], samples[:, 1], samples[:, 2],
-           marker="x", color="r", label="random interior samples")
-ax.scatter(boundary_samples[:, 0], boundary_samples[:, 1],
-           boundary_samples[:, 2], marker="x", color="g", label="boundary")
+ax.scatter(
+    potato.voxel_center_coordinates[:, 0],
+    potato.voxel_center_coordinates[:, 1],
+    potato.voxel_center_coordinates[:, 2],
+    label="voxel center coordinates",
+    marker="o",
+    facecolors="none",
+    edgecolors="blue",
+)
+ax.scatter(
+    samples[:, 0],
+    samples[:, 1],
+    samples[:, 2],
+    marker="x",
+    color="r",
+    label="random interior samples",
+)
+ax.scatter(
+    boundary_samples[:, 0],
+    boundary_samples[:, 1],
+    boundary_samples[:, 2],
+    marker="x",
+    color="g",
+    label="boundary",
+)
 plt.legend()
 plt.show()

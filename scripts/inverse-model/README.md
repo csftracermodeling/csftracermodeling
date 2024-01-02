@@ -17,9 +17,13 @@ For Jax PINN scripts, run
 ```
 $ python scripts/inverse-model/pinn-inverse-diffusion.py
 ```
-To investigate the loss and parameter during training, in a second terminal you can run
+This script stores output to './pinn_outputs/'.
+
+To investigate the loss and parameters after training, in a second terminal you can run
 ```
-$ python scripts/inverse-model/pinn-postprocess.py --outfolder pinn_outputs/
+$ python scripts/inverse-model/pinn-postprocess.py \
+--outfolder pinn_outputs --datapath data/freesurfer/CONCENTRATIONS/ \
+--mask data/roi12/parenchyma_mask_roi.mgz
 ```
 This will also plot the prediction and store the prediction at all time points as MRI.
 

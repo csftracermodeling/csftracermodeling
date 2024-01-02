@@ -24,10 +24,9 @@ else:
 time_idx = 1
 
 # Only load images up to 24 hours after baseline:
-Tmax = 24*6
+Tmax = 24 * 6
 
-data = Voxel_Data(datapath=datapath, mask=mask,
-                  pixelsizes=[1, 1, 1], Tmax=Tmax)
+data = Voxel_Data(datapath=datapath, mask=mask, pixelsizes=[1, 1, 1], Tmax=Tmax)
 
 
 print("Bounds:", data.bounds())
@@ -50,16 +49,16 @@ if len(mask.shape) == 3:
     slice_ax = 2
     maskslice = np.take(mask, axis=slice_ax, indices=slice_idx)
     if maskslice.sum() == 0:
-        print("Warning: the slice you have chosen for plotting does not intersect with the ROI!")
+        print(
+            "Warning: the slice you have chosen for plotting does not intersect with the ROI!"
+        )
         print("--> Exiting script.")
         exit()
 
 
 plt.figure()
-plt.title(
-    f"Samples from ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
-plt.scatter(inputs[:, 1], inputs[:, 2], marker="s",
-            c=targets, s=42, vmin=0, vmax=0.1)
+plt.title(f"Samples from ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
+plt.scatter(inputs[:, 1], inputs[:, 2], marker="s", c=targets, s=42, vmin=0, vmax=0.1)
 
 
 try:
@@ -86,8 +85,7 @@ plt.imshow(np.rot90(roislice), cmap="Reds")
 
 
 plt.figure()
-plt.title(
-    f"Image cut to ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
+plt.title(f"Image cut to ROI at t={data.measurement_times()[time_idx]/3600:.2f} hours")
 plt.imshow(imageslice_roi, vmin=0, vmax=0.1)
 
 plt.show()

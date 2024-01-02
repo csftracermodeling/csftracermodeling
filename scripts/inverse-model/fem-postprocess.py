@@ -11,22 +11,28 @@ from matplotlib import rc
 
 from tracerdiffusion.utils import function_to_image
 
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-rc('text', usetex=True)
-plt.rcParams.update({'font.size': 30})
+rc("font", **{"family": "serif", "serif": ["Computer Modern"]})
+rc("text", usetex=True)
+plt.rcParams.update({"font.size": 30})
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hdffile", required=True,
-                        help="""Path to hdf file storing the simulation results where data is availabe"""
-                        )
-    parser.add_argument("--moviefile", required=True,
-                        help="""Path to hdf file storing the simulation results at all times"""
-                        )
-    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz", required=True,
-                    help="path to mask from which mesh was made.")
-    
+    parser.add_argument(
+        "--hdffile",
+        required=True,
+        help="""Path to hdf file storing the simulation results where data is availabe""",
+    )
+    parser.add_argument(
+        "--moviefile",
+        required=True,
+        help="""Path to hdf file storing the simulation results at all times""",
+    )
+    parser.add_argument(
+        "--mask",
+        default="./roi12/parenchyma_mask_roi.mgz",
+        required=True,
+        help="path to mask from which mesh was made.",
+    )
 
     parserargs = vars(parser.parse_args())
 
@@ -36,10 +42,8 @@ if __name__ == "__main__":
     labels = ["$L^2$-error", "$D \,(10^{-4}$ mm$^2$/s)", "$r \, (10^{-6}$/s)"]
     scales = [1, 1e4, 1e6]
 
-
-    fs = None # 26
+    fs = None  # 26
     dpi = 300
-
 
     for file, label, scale in zip(files, labels, scales):
         plt.figure()
@@ -68,16 +72,14 @@ if __name__ == "__main__":
     assert hdffile.is_file()
     assert hdffile.suffix == ".hdf"
 
-
-    f = h5py.File(hdffile, 'r')
+    f = h5py.File(hdffile, "r")
     print(list(f.keys()))
 
-    roimesh= dolfin.Mesh()
+    roimesh = dolfin.Mesh()
     hdf = dolfin.HDF5File(roimesh.mpi_comm(), str(hdffile), "r")
     hdf.read(roimesh, "/mesh", False)
-    
-    V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
 
+    V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
 
     for key in list(f.keys()):
         if key == "mesh":
@@ -87,17 +89,19 @@ if __name__ == "__main__":
 
         hdf.read(u, key)
 
-        function_nii, _ = function_to_image(function=u, template_image=template_image, extrapolation_value=np.nan, 
-                                            mask = mask,
-                                            # mask=template_image
-                                            )
+        function_nii, _ = function_to_image(
+            function=u,
+            template_image=template_image,
+            extrapolation_value=np.nan,
+            mask=mask,
+            # mask=template_image
+        )
 
-        filename = str(parserargs["outfolder"] / (re.sub("[^0-9]","", key) + "h.mgz"))
-        print("Stored", filename    )
+        filename = str(parserargs["outfolder"] / (re.sub("[^0-9]", "", key) + "h.mgz"))
+        print("Stored", filename)
         nibabel.save(function_nii, filename)
 
     hdf.close()
-
 
     # plt.show()
 
@@ -108,14 +112,13 @@ if __name__ == "__main__":
     assert hdffile.is_file()
     assert hdffile.suffix == ".hdf"
 
-
-    f = h5py.File(hdffile, 'r')
+    f = h5py.File(hdffile, "r")
     print(list(f.keys()))
 
-    roimesh= dolfin.Mesh()
+    roimesh = dolfin.Mesh()
     hdf = dolfin.HDF5File(roimesh.mpi_comm(), str(hdffile), "r")
     hdf.read(roimesh, "/mesh", False)
-    
+
     V = dolfin.FunctionSpace(roimesh, "Lagrange", 1)
 
     u = dolfin.Function(V)
@@ -123,9 +126,11 @@ if __name__ == "__main__":
     hdf.read(u, "42.0")
     hdf.close()
 
-    function_nii, _ = function_to_image(function=u, template_image=template_image, extrapolation_value=np.nan, 
-                                        mask = mask,
-                                        # mask=template_image
-                                        )
+    function_nii, _ = function_to_image(
+        function=u,
+        template_image=template_image,
+        extrapolation_value=np.nan,
+        mask=mask,
+        # mask=template_image
+    )
     nibabel.save(function_nii, str(parserargs["outfolder"] / "42h.mgz"))
-
