@@ -1,23 +1,8 @@
-# Setup
-
-For FEniCS scripts, run in terminal:
-
-```
-git clone https://github.com/bzapf/inverseDiffusion.git
-cd inverseDiffusion
-conda env create -f fenics-env.yml
-conda activate diffusion-fenics-env
-pip install -e .
-export WORKDIR=./data/freesurfer/
-```
-
-
-
 For Jax PINN scripts, run
 ```
 $ python scripts/inverse-model/pinn-inverse-diffusion.py
 ```
-This script stores output to './pinn_outputs/'.
+This script stores output to `./pinn_outputs/`.
 
 To investigate the loss and parameters after training, in a second terminal you can run
 ```
@@ -29,10 +14,19 @@ This will also plot the prediction and store the prediction at all time points a
 
 
 # Compare FEM and PINN results
+Assuming you have stored some PINN outputs under `pinn_outputs` and FEM output under `simulation_outputs/3600_12/` (for a time step of 3600 s and a mesh resolution parameter 12), you can run
 ```
-$ python scripts/inverse-model/compare-pinn-fem.py --pinnfolder pinn_outputs/ --femfolder simulation_outputs_450_roi20/
+$ python scripts/inverse-model/compare-pinn-fem-parameters.py \
+--pinnfolder pinn_outputs/ --femfolder simulation_outputs/3600_12/
 ```
-
+and
+```
+python scripts/inverse-model/compare-pinn-fem-prediction.py \
+--pinnfolder pinn_outputs/ --femfolder simulation_outputs/3600_12/ \
+--datapath data/freesurfer/CONCENTRATIONS/ \
+--mask data/roi12/parenchyma_mask_roi.mgz
+```
+to get some information about the results.
 
 
 # Examples

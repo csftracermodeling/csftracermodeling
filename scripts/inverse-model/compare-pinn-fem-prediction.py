@@ -26,12 +26,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--datapath",
         required=True,
-        help="""Path to data folder on which the PINN was trained""",
+        help="""Path to data folder on which the models were trained.""",
     )
     parser.add_argument(
         "--mask",
         default="./roi12/parenchyma_mask_roi.mgz",
-        help="path to mask from which mesh was made.",
+        help="path to mask from which mesh was made/the PINN domain was defined.",
     )
 
     parserargs = vars(parser.parse_args())
