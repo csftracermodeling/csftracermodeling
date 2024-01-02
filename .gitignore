@@ -27,7 +27,8 @@ __pycache__/
 
 roi12/*
 !roi12/parenchyma_mask_roi12.xml
-
+rawdata
+concentrationdata
 # C extensions
 *.so
 

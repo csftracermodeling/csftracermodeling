@@ -1,9 +1,9 @@
 [project]
 name = "tracerdiffusion"
 authors = [
-    {name = "Bastian Zapf", email = "bastian@simula.no"},
-    {name = "Marius Zeinhofer", email = "mariusz@simula.no"}
-    ]
+	{ name = "Bastian Zapf", email = "bastian@xal.no" },
+	{ name = "Marius Zeinhofer", email = "mariusz@simula.no" },
+]
 version = "0.0.1"
 requires-python = ">=3.8"
 
@@ -12,7 +12,7 @@ requires-python = ">=3.8"
 readme = "README.md"
 
 # Path to license file
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 
 # Direct dependencies
 dependencies = [
