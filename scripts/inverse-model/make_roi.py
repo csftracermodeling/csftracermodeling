@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     meshresolution = parserargs["resolution"]
 
-    outfolder = pathlib.Path.cwd() / ("roi" + str(meshresolution) + "/")
+    outfolder = pathlib.Path.cwd() / "data" / ("roi" + str(meshresolution) + "/")
 
     if outfolder.is_dir():
         answer = None
