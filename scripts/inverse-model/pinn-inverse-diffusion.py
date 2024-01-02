@@ -27,7 +27,7 @@ jax.config.update("jax_enable_x64", True)
 #------------------------------------------------------------------------#
 domainmask = "./roi12/parenchyma_mask_roi.mgz"
 boundarymask = "./roi12/parenchyma_mask_boundary.mgz"
-datapath="./data/mridata3d/CONCENTRATIONS/"
+datapath="./data/freesurfer/CONCENTRATIONS/"
 mask = "./roi12/parenchyma_mask_roi.mgz"
 
 outputpath = "./pinn_outputs/"

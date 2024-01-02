@@ -128,10 +128,8 @@ if __name__ == "__main__":
     domain.save(outfile)
 
     # Convert mesh to FEniCS format (.xml) and paraview-friendly format for visualization (.xdmf)
-    os.system("meshio convert " + outfile + " " +
-              outfile.replace(".mesh", ".xml"))
-    os.system("meshio convert " + outfile + " " +
-              outfile.replace(".mesh", ".xdmf"))
+    os.system("meshio convert " + outfile + " " + outfile.replace(".mesh", ".xml"))
+    os.system("meshio convert " + outfile + " " + outfile.replace(".mesh", ".xdmf"))
 
     """
     Print some info over the mesh using FEniCS

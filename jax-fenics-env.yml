@@ -1,6 +1,7 @@
 name: jax-fenics-env
 channels:
   - conda-forge
+  - nvidia  # needed for cuda-toolkit. if specific version is required, this needs to be changed.
 dependencies:
   - numpy
   - matplotlib
@@ -11,7 +12,11 @@ dependencies:
   - h5py
   - scikit-image
   - nibabel
-  - pip:
+  - tqdm
+  - parse
+  - optax
+  - cuda-toolkit 
+  - pip: 
     - jax
     - jaxtyping
     - jaxopt
