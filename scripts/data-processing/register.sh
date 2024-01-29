@@ -31,6 +31,7 @@ mkdir -pv ${OUTPUTFOLDER}
 
 # Resample the images to 256x256x256 voxels (FreeSurfer standard) 
 for inputfile in ${INPUTFOLDER}/*.mgz; do
+    # Here, we use the shell command 'basename' to extract the filename from the variable 'inputfile' which contains the full path to the image. 
     filename=$(basename $inputfile)
     # Resample to 256 x 256 x 256
     # cf. https://surfer.nmr.mgh.harvard.edu/fswiki/mri_convert
