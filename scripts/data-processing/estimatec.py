@@ -115,7 +115,9 @@ if __name__ == "__main__":
         help="path to folder in which the normalized images are stored.")
     parser.add_argument("--exportfolder", required=True, type=str, 
         help="path to export concentration images. will be stored. Will be created if it does not exist.")
-    parser.add_argument('--t1map', type=str, default=None, help="T1 Map as .mgz file")
+    parser.add_argument('--t1map', type=str, default=None, 
+                        help=("T1 Map as .mgz file."
+                              "If None, it is assumed that the images in --inputfolder are T1 maps."))
     parser.add_argument('--mask', type=str, default=None, help="Path to mask for the brain")
     parser.add_argument('--baseline', type=str, default=None, help="Manually specify path to baseline in case sorting fails.")
     

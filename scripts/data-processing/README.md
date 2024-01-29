@@ -89,15 +89,15 @@ python ./scripts/data-processing/estimatec.py \
 --mask ./data/freesurfer/mri/parenchyma_mask.mgz
 ```
 
+Note that without the flagged argument `--t1map`, it is assumed that the images in the directory specified with `--inputfolder` are T_1-maps.
+With `--mask` we provide a binary mask for the brain tissue, and the concentration is computed only in the masked voxels. 
+This is useful for visualizations.
+Further, specifying a mask can be necessary if the T1 values are subject to large uncertainties in some regions of the brain, and quantifying tracer within these regions is not feasible (For the T1--map under consideration here, an example are the CSF compartments. 
+The used T1 mapping sequence, 'MOLLI5(3)3', was calibrated to yield accurate T1--values in the brain, yielding less reliable values in the CSF.).
 
 
-
-If a T1 map is available (same resolution as T1 weighted images and registered to T1 weighted images)
-```
-python ./scripts/data-processing/estimatec.py \
---inputfolder ./data/freesurfer/REGISTERED/ \
---exportfolder ./data/freesurfer/CONCENTRATIONS/
-```
+If a T1 map is available (same resolution as T1 weighted images and registered to T1 weighted images), replace the argument given to
+`--t1map` with the path to the correct T1 Map.
 
 ## References
 
