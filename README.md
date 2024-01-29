@@ -1,38 +1,3 @@
-# Getting started
-Download the code: 
-```
-git clone https://github.com/bzapf/tracerdiffusion.git
-```
-
-## Setup
-
-# Data processing and simulations (FEniCS).
-For data processing, installing FreeSurfer is required.
-If you only want to run simulations, you do not necessarily need to install FreeSurfer. 
-You can instead download the processed data from **???**.
-
-In both cases, install the necessary Python packages by running the following commands in the terminal:
-
-```bash
-git clone https://github.com/bzapf/tracerdiffusion.git
-cd tracerdiffusion
-conda env create -f fenics-env.yml
-conda activate diffusion-fenics-env
-python3 -m pip install -e .
-export WORKDIR=./data/freesurfer/
-```
-
-For jax/PINNs scripts, run in terminal:
-
-```bash
-git clone https://github.com/bzapf/tracerdiffusion.git
-cd tracerdiffusion
-conda env create -f jax.yml
-conda activate jax
-python3 -m pip install -e .
-```
-
-
 # Requirements
 
 ## For data processing
@@ -72,6 +37,32 @@ and should be put into the top level in your cloned repository under `/data/` as
         ├──parenchyma_mask_roi.mgz
         ├──parenchyma_mask_boundary.mgz
         ├──parenchyma_mask_roi12.xml
+```
+
+# Setup
+
+## Data processing
+Install FreeSurfer.
+To create and environment for the scripts using FEniCS and FreeSurfer for data processing and simulations, run in the terminal:
+
+```bash
+git clone https://github.com/csftracermodeling/csftracermodeling.git
+cd tracerdiffusion
+conda env create -f fenics-env.yml
+conda activate diffusion-fenics-env
+python3 -m pip install -e .
+export WORKDIR=./data/freesurfer/
+```
+For the scripts that rely only on FEniCS there is also a Dockerfile in this repository.
+
+For Jax/PINNs scripts, run in the terminal:
+
+```bash
+git clone https://github.com/csftracermodeling/csftracermodeling.git
+cd tracerdiffusion
+conda env create -f jax.yml
+conda activate jax
+python3 -m pip install -e .
 ```
 
 # Running the scripts
