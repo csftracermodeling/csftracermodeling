@@ -1,12 +1,19 @@
+import subprocess
 import SVMTK as svmtk
 import os
-import meshio
+
+try:
+    import meshio  # noqa: F401 meshio is used from a subprocess
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "meshio is not installed, but required this script to work."
+    )
 import pathlib
 
 
-def create_gwv_mesh(pial_stl, ventricles_stl, resolution,
-                    output, remove_ventricles=True):
-
+def create_gwv_mesh(
+    pial_stl, ventricles_stl, resolution, output, remove_ventricles=True
+):
     assert os.path.isfile(pial_stl)
     assert os.path.isfile(ventricles_stl)
 
@@ -37,21 +44,27 @@ def create_gwv_mesh(pial_stl, ventricles_stl, resolution,
 
 
 if __name__ == "__main__":
-
     outputfile = "./data/freesurfer/meshes/lh.mesh"
 
     os.makedirs(pathlib.Path(outputfile).parent, exist_ok=True)
 
-    create_gwv_mesh(pial_stl="./data/freesurfer/surf/lh.pial.stl",
-                    ventricles_stl="./data/freesurfer/surf/ventricles.stl",
-                    resolution=16,
-                    output=outputfile, remove_ventricles=True)
+    create_gwv_mesh(
+        pial_stl="./data/freesurfer/surf/lh.pial.stl",
+        ventricles_stl="./data/freesurfer/surf/ventricles.stl",
+        resolution=16,
+        output=outputfile,
+        remove_ventricles=True,
+    )
 
-    os.system("meshio convert " + outputfile + " " + outputfile.replace(".mesh", ".xml"))
-    os.system("meshio convert " + outputfile + " " + outputfile.replace(".mesh", ".xdmf"))
+    cmd = "meshio convert " + outputfile + " " + outputfile.replace(".mesh", ".xml")
+    subprocess(cmd, shell=True).check_returncode()
+    cmd = "meshio convert " + outputfile + " " + outputfile.replace(".mesh", ".xdmf")
+    subprocess(cmd, shell=True).check_returncode()
 
     try:
+        # If FEniCS is installed, we create a boundary mesh. This can be useful for visualizations.
         from fenics import *
+
         lhmesh = Mesh(outputfile.replace(".mesh", ".xml"))
 
         meshboundary = BoundaryMesh(lhmesh, "exterior")
@@ -60,8 +73,20 @@ if __name__ == "__main__":
 
         File(boundarymeshfile) << meshboundary
 
-        os.system("meshio convert " + boundarymeshfile + " " + boundarymeshfile.replace(".xml", ".xdmf"))
-        os.system("meshio convert " + boundarymeshfile + " " + boundarymeshfile.replace(".xml", ".stl"))
+        cmd = (
+            "meshio convert "
+            + boundarymeshfile
+            + " "
+            + boundarymeshfile.replace(".xml", ".xdmf")
+        )
+        subprocess(cmd, shell=True).check_returncode()
+        cmd = (
+            "meshio convert "
+            + boundarymeshfile
+            + " "
+            + boundarymeshfile.replace(".xml", ".stl")
+        )
+        subprocess(cmd, shell=True).check_returncode()
 
     except ModuleNotFoundError:
         pass
@@ -73,5 +98,8 @@ if __name__ == "__main__":
 
     print()
     print("To view the mesh surface in freeview, run")
-    print("freeview ./data/freesurfer/mri/aseg.mgz -f " + boundarymeshfile.replace(".xml", ".stl"))
+    print(
+        "freeview ./data/freesurfer/mri/aseg.mgz -f "
+        + boundarymeshfile.replace(".xml", ".stl")
+    )
     print("*" * 80)

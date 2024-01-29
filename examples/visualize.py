@@ -28,10 +28,9 @@ else:
 time_idx = 1
 
 # Only load images up to 24 hours after baseline:
-Tmax = 3600*24
+Tmax = 3600 * 24
 
-data = Voxel_Data(datapath=datapath, mask=mask,
-                  pixelsizes=[1, 1, 1], Tmax=Tmax)
+data = Voxel_Data(datapath=datapath, mask=mask, pixelsizes=[1, 1, 1], Tmax=Tmax)
 
 ############################################################################################################################
 # Select a slice
@@ -41,7 +40,9 @@ if len(mask.shape) == 3:
     slice_ax = 2
     maskslice = np.take(mask, axis=slice_ax, indices=slice_idx)
     if maskslice.sum() == 0:
-        print("Warning: the slice you have chosen for plotting does not intersect with the ROI!")
+        print(
+            "Warning: the slice you have chosen for plotting does not intersect with the ROI!"
+        )
         print("--> Exiting script.")
         exit()
 try:
@@ -70,7 +71,8 @@ except ModuleNotFoundError:
 
 plt.figure()
 plt.title(
-    f"Slice through data at t= {data.measurement_times()[time_idx]/3600:.2f} hours")
+    f"Slice through data at t= {data.measurement_times()[time_idx]/3600:.2f} hours"
+)
 plt.imshow(imageslice, vmin=0, vmax=0.1)
 plt.colorbar()
 

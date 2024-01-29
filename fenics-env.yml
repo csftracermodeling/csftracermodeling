@@ -1,4 +1,4 @@
-name: fenics-env
+name: diffusion-fenics-env
 channels:
   - conda-forge
   - defaults

@@ -38,8 +38,8 @@ python3 -m pip install -e .
 ## For data processing
 
 - FreeSurfer needs to be installed
-- the conda environment `diffusion-fenics-env` needs to be installed (see below)
-- The following folders/files are needed and can be obtained from https://github.com/bzapf/rawdata and should be put into the top level under `/data/` in your cloned reposity as:
+- the conda environment `diffusion-fenics-env` needs to be created and the necessary packages installed (see below)
+- The following folders/files are needed and can be obtained from https://github.com/bzapf/rawdata and should be put into the top level under `/data/` in your cloned repository as:
 ```
 ├──data
     ├──freesurfer
@@ -53,9 +53,10 @@ python3 -m pip install -e .
 
 ## For inverse problems (PINN and FEM)
 
-Assumes that MRI have been processed and concentration estimates computed. Also a mesh is assumed and a ROI.
+Assumes that MRI have been processed and concentration estimates computed. 
+Also, a mesh is assumed and a region of interest (ROI).
 Alternatively, this data can be obtained from https://github.com/bzapf/concentrationdata
-and should be put into the top level in your cloned reposity under `/data/` as:
+and should be put into the top level in your cloned repository under `/data/` as:
 ```
 ├──data
     ├──freesurfer
@@ -67,8 +68,12 @@ and should be put into the top level in your cloned reposity under `/data/` as:
         │   ├── parenchyma_mask.mgz
         ├── meshes
         │   ├── lh.xml
-├──roi12
-    ├──parenchyma_mask_roi.mgz
-    ├──parenchyma_mask_boundary.mgz
-    ├──parenchyma_mask_roi12.xml
+    ├──roi12
+        ├──parenchyma_mask_roi.mgz
+        ├──parenchyma_mask_boundary.mgz
+        ├──parenchyma_mask_roi12.xml
 ```
+
+# Running the scripts
+
+Note that there are README files in the subfolders of `/scripts/`.

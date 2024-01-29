@@ -7,14 +7,17 @@ import pathlib
 from tracerdiffusion.utils import function_to_image
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mesh", required=True,
-                        type=str, help="FEniCS mesh file")
-    parser.add_argument("--image", required=True, type=str,
-                        help="MRI to get the vox2ras matrices from")
-    parser.add_argument("--output", required=True, type=str,
-                        help="Where to store the mask. Example: ./meshmask.mgz")
+    parser.add_argument("--mesh", required=True, type=str, help="FEniCS mesh file")
+    parser.add_argument(
+        "--image", required=True, type=str, help="MRI to get the vox2ras matrices from"
+    )
+    parser.add_argument(
+        "--output",
+        required=True,
+        type=str,
+        help="Where to store the mask. Example: ./meshmask.mgz",
+    )
     parserargs = vars(parser.parse_args())
 
     # Load data
@@ -38,7 +41,8 @@ if __name__ == "__main__":
     f.vector()[:] = 1
 
     output_volume, output_arry = function_to_image(
-        function=f, template_image=nii_img, extrapolation_value=0)
+        function=f, template_image=nii_img, extrapolation_value=0
+    )
 
     nibabel.save(output_volume, parserargs["output"])
 

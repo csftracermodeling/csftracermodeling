@@ -1,9 +1,7 @@
 import jax
 import jax.numpy as jnp
-from jax import random, grad, vmap, jit
-import optax
+from jax import vmap
 import argparse
-import os
 import nibabel
 import numpy as np
 import pathlib
@@ -16,22 +14,16 @@ import tracerdiffusion.jax_example.slim_natgrad.mlp as mlp
 import pickle
 
 
-# from IPython import embed
 def load_nn(parserargs: dict, hyperparameters: dict):
-    
-    pkl_file = open(parserargs["outfolder"] / "nn_params.pkl", 'rb')
+    pkl_file = open(parserargs["outfolder"] / "nn_params.pkl", "rb")
     nn_params = pickle.load(pkl_file)
     pkl_file.close()
-
 
     minimum = jnp.array(hyperparameters["minimum"])
     maximum = jnp.array(hyperparameters["maximum"])
 
-
     # model
-    activation = lambda x : jnp.tanh(x)
-    layer_sizes = hyperparameters["layer_sizes"]
-    # params = mlp.init_params(layer_sizes, random.PRNGKey(hyperparameters["seed"]))
+    activation = lambda x: jnp.tanh(x)
     unnormalized_model = mlp.mlp(activation)
 
     def model(params, x):
@@ -43,31 +35,34 @@ def load_nn(parserargs: dict, hyperparameters: dict):
 
     def nn(x):
         return v_model(nn_params, x)
-    
+
     return nn
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--outfolder", required=True,
-                        help="""Path to output folder storing the PINN results"""
-                        )
-    parser.add_argument("--datapath", required=True,
-                        help="""Path to data folder on which the PINN was trained"""
-                        )
-    parser.add_argument("--mask", default="./roi12/parenchyma_mask_roi.mgz",
-                    help="path to mask from which mesh was made.")
-    
+    parser.add_argument(
+        "--outfolder",
+        required=True,
+        help="""Path to output folder storing the PINN results""",
+    )
+    parser.add_argument(
+        "--datapath",
+        required=True,
+        help="""Path to data folder on which the PINN was trained""",
+    )
+    parser.add_argument(
+        "--mask",
+        default="./roi12/parenchyma_mask_roi.mgz",
+        help="path to mask from which mesh was made.",
+    )
 
     parserargs = vars(parser.parse_args())
 
     parserargs["outfolder"] = pathlib.Path(parserargs["outfolder"])
 
-    with open(parserargs["outfolder"] / 'hyperparameters.json') as data_file:    
+    with open(parserargs["outfolder"] / "hyperparameters.json") as data_file:
         hyperparameters = json.load(data_file)
-
-
-
 
     ############################################################################################################################
     # Plotting
@@ -84,23 +79,26 @@ if __name__ == "__main__":
     else:
         mask = nibabel.load(mask).get_fdata().astype(bool)
 
-
-    data = Voxel_Data(datapath=parserargs["datapath"], mask=mask, pixelsizes=[1,1, 1], Tmax=hyperparameters["Tmax"])
+    data = Voxel_Data(
+        datapath=parserargs["datapath"],
+        mask=mask,
+        pixelsizes=[1, 1, 1],
+        Tmax=hyperparameters["Tmax"],
+    )
 
     nn = load_nn(parserargs=parserargs, hyperparameters=hyperparameters)
 
-    # plt.close("all")
-
     if len(mask.shape) == 3:
-
         maskslice = np.take(mask, axis=slice_ax, indices=slice_idx)
         if maskslice.sum() == 0:
-            print("Warning: the slice you have chosen for plotting does not intersect with the ROI!")
+            print(
+                "Warning: the slice you have chosen for plotting does not intersect with the ROI!"
+            )
             print("--> Exiting script.")
             exit()
     try:
         image = np.load(data.files[time_idx]) * mask
-        
+
     except ValueError:
         image = nibabel.load(data.files[time_idx])
         affine = image.affine
@@ -127,7 +125,12 @@ if __name__ == "__main__":
     vmin, vmax = None, 0.25
 
     plt.figure()
-    plt.title("Slice through data" + " at t=" + format(data.measurement_times()[time_idx]/3600, ".2f") + " hours")
+    plt.title(
+        "Slice through data"
+        + " at t="
+        + format(data.measurement_times()[time_idx] / 3600, ".2f")
+        + " hours"
+    )
     plt.imshow(imageslice, vmin=vmin, vmax=vmax)
     plt.colorbar()
 
@@ -137,7 +140,7 @@ if __name__ == "__main__":
     xyz = data.voxel_center_coordinates - data.domain.dx
 
     t_xyz = np.zeros((xyz.shape[0], xyz.shape[1] + 1))
-            
+
     t_xyz[:, 0] = t
 
     t_xyz[:, 1:] = xyz
@@ -145,7 +148,6 @@ if __name__ == "__main__":
     pred = nn(t_xyz)
 
     predimg[mask] = pred
-
 
     predslice = np.take(predimg, axis=slice_ax, indices=slice_idx)
     predslice = np.rot90(predslice)
@@ -158,7 +160,6 @@ if __name__ == "__main__":
     except ModuleNotFoundError:
         print("Some modulels for plotting could not be imported, will not zoom to data")
 
-
     ############################################################################################################################
     # Plot the Network prediction
 
@@ -167,14 +168,10 @@ if __name__ == "__main__":
     plt.imshow(predslice, vmin=vmin, vmax=vmax)
     plt.colorbar()
 
-
-
     ############################################################################################################################
     # Store all predictions as MRI
 
     for tkey, filename in data.time_filename_mapping.items():
-
-
         t_xyz[:, 0] = float(tkey)
 
         pred = nn(t_xyz)
@@ -183,13 +180,11 @@ if __name__ == "__main__":
 
         nn_nii = nibabel.Nifti1Image(predimg, affine)
 
-        filename = str(parserargs["outfolder"] / ( format(float(tkey), ".0f") + "h.mgz"))
+        filename = str(parserargs["outfolder"] / (format(float(tkey), ".0f") + "h.mgz"))
 
         nibabel.save(nn_nii, filename)
 
         print("Stored", filename)
-
-
 
     # We can also evaluate the NN at a time where no data is available, example: at 42 h
     t_xyz[:, 0] = 42
@@ -200,36 +195,28 @@ if __name__ == "__main__":
 
     nn_nii = nibabel.Nifti1Image(predimg, affine)
 
-    filename = str(parserargs["outfolder"] /  "42h.mgz")
+    filename = str(parserargs["outfolder"] / "42h.mgz")
 
     nibabel.save(nn_nii, filename)
 
     print("Stored", filename)
 
-
-
-
     ############################################################################################################################
     # Print parameters during training
 
-
-
     epochs = np.genfromtxt(parserargs["outfolder"] / "Epoch.txt", delimiter=",")
 
-    files = ["J.txt",  
-             "D.txt",
-             "r.txt"
-             ]
-    labels = [r"PINN Loss $\mathcal{J} = \mathcal{J}_d + \mathcal{J}_p$",
-              "diffusion coefficient $D$ ($10^{-4}$ mm$^2$/s)", 
-              "reaction rate $r$ ($10^{-5}$/s)"
-              ]
+    files = ["J.txt", "D.txt", "r.txt"]
+    labels = [
+        r"PINN Loss $\mathcal{J} = \mathcal{J}_d + \mathcal{J}_p$",
+        "diffusion coefficient $D$ ($10^{-4}$ mm$^2$/s)",
+        "reaction rate $r$ ($10^{-5}$/s)",
+    ]
     scales = [1, 1e4, 1e5]
 
     plotfuns = [plt.semilogy, plt.plot]
 
     for file, label, scale, plotfun in zip(files, labels, scales, plotfuns):
-        
         plt.figure()
         history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
 
@@ -238,22 +225,21 @@ if __name__ == "__main__":
         plt.ylabel(label)
         plt.tight_layout()
 
-    files = ["J.txt",  
-             "J_d.txt", "J_pde.txt",
+    files = [
+        "J.txt",
+        "J_d.txt",
+        "J_pde.txt",
+    ]
+    labels = [
+        r"$\mathcal{J} = \mathcal{J}_d + w_{pde}\mathcal{J}_{pde}$",
+        r"$\mathcal{J}_d$",
+        r"$\mathcal{J}_{pde}$",
+    ]
 
-             ]
-    labels = [r"$\mathcal{J} = \mathcal{J}_d + w_{pde}\mathcal{J}_{pde}$",
-              r"$\mathcal{J}_d$",
-              r"$\mathcal{J}_{pde}$",
-              ]
-    
     scales = [1, 1, 1, 1e4, 1e5]
-
 
     plt.figure()
     for file, label, scale in zip(files, labels, scales):
-        
-        
         history = np.genfromtxt(parserargs["outfolder"] / file, delimiter=",")
 
         plt.semilogy(epochs, history * scale, label=label)
@@ -262,6 +248,4 @@ if __name__ == "__main__":
         plt.legend()
         plt.tight_layout()
 
-
-    # exit()
     plt.show()
