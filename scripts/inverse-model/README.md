@@ -1,7 +1,7 @@
 # Creating a region of interest (ROI)
 Run
 ```
-$ python ./scripts/inverse-model/make_roi.py \
+$ python ./scripts/inverse-model/roi.py \
     --maskfile ./data/freesurfer/mri/parenchyma_mask.mgz \
     --resolution 12
 ```
@@ -10,6 +10,14 @@ where `./data/freesurfer/mri/parenchyma_mask.mgz` is an MRI volume where all bra
 # Inverse modeling
 
 ## For FEM scripts based on FEniCS
+Run
+```
+$ conda activate diffusion-fenics-env \
+$ python scripts/inverse-model/fem-inverse-diffusion.py \
+    --data data/freesurfer/CONCENTRATIONS/ \
+    --mesh data/roi12/parenchyma_mask_roi12.xml \
+    --mask data/roi12/parenchyma_mask_roi.mgz
+```
 
 ## Physics-informed neural networks
 
