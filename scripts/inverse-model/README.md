@@ -1,11 +1,29 @@
+# Creating a region of interest (ROI)
+Run
+```
+$ python ./scripts/inverse-model/make_roi.py \
+    --maskfile ./data/freesurfer/mri/parenchyma_mask.mgz \
+    --resolution 12
+```
+where `./data/freesurfer/mri/parenchyma_mask.mgz` is an MRI volume where all brain parenchyma voxels are labelled with 1, and all other voxels with 0. The `resolution` parameter determines the resolution of the mesh created. 
+
+# Inverse modeling
+
+## For FEM scripts based on FEniCS
+
+## Physics-informed neural networks
+
 For Jax PINN scripts, run
 ```
+$ conda activate jax
 $ python scripts/inverse-model/pinn-inverse-diffusion.py
 ```
 This script stores output to `./pinn_outputs/`.
 
+
 To investigate the loss and parameters after training, in a second terminal you can run
 ```
+$ conda activate jax
 $ python scripts/inverse-model/pinn-postprocess.py \
 --outfolder pinn_outputs --datapath data/freesurfer/CONCENTRATIONS/ \
 --mask data/roi12/parenchyma_mask_roi.mgz

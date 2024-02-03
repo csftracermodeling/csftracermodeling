@@ -10,15 +10,14 @@ import os
 import json
 import pickle
 import argparse
-import tracerdiffusion.jax_example.slim_natgrad.mlp as mlp
-from tracerdiffusion.jax_example.slim_natgrad.integrators import EvolutionaryIntegrator
-from tracerdiffusion.jax_example.slim_natgrad.derivatives import del_i
-from tracerdiffusion.jax_example.slim_natgrad.domains import DummyDomain, TimeDomain
-from tracerdiffusion.jax_example.slim_natgrad.data import DataSet, DataIntegrator
+import tracerdiffusion.jax_utils.slim_natgrad.mlp as mlp
+from tracerdiffusion.jax_utils.slim_natgrad.integrators import EvolutionaryIntegrator
+from tracerdiffusion.jax_utils.slim_natgrad.derivatives import del_i
+from tracerdiffusion.jax_utils.slim_natgrad.domains import DummyDomain, TimeDomain
+from tracerdiffusion.jax_utils.slim_natgrad.data import DataSet, DataIntegrator
 
 from tracerdiffusion.domains import ImageDomain
 from tracerdiffusion.data import Voxel_Data
-
 
 jax.config.update("jax_enable_x64", True)
 
@@ -159,7 +158,11 @@ data_integrator = DataIntegrator(
 )
 
 # model
-activation = lambda x: jnp.tanh(x)
+
+
+def activation(x): return jnp.tanh(x)
+
+
 layer_sizes = hyperparameters["layer_sizes"]
 params = mlp.init_params(layer_sizes, random.PRNGKey(hyperparameters["seed"]))
 unnormalized_model = mlp.mlp(activation)
@@ -211,10 +214,12 @@ pickle.dump(params_r, output)
 output.close()
 
 # differential operators
-dt = lambda g: del_i(g, 0)
-ddx_1 = lambda g: del_i(del_i(g, 1), 1)
-ddx_2 = lambda g: del_i(del_i(g, 2), 2)
-ddx_3 = lambda g: del_i(del_i(g, 3), 3)
+
+
+def dt(g): return del_i(g, 0)
+def ddx_1(g): return del_i(del_i(g, 1), 1)
+def ddx_2(g): return del_i(del_i(g, 2), 2)
+def ddx_3(g): return del_i(del_i(g, 3), 3)
 
 
 def heat_operator(u, params_d, params_r):
@@ -227,12 +232,16 @@ def heat_operator(u, params_d, params_r):
 
 
 # trick to get the signature (params, params_d, v_x) -> v_residual(params, params_d, v_x)
-_residual = lambda params, params_d, params_r: heat_operator(
+def _residual(params, params_d, params_r): return heat_operator(
     lambda x: model(params, x), params_d, params_r
 )
-residual = lambda params, params_d, params_r, x: _residual(params, params_d, params_r)(
+
+
+def residual(params, params_d, params_r, x): return _residual(params, params_d, params_r)(
     x
 )
+
+
 v_residual = jit(vmap(residual, (None, None, None, 0)))
 
 
