@@ -201,14 +201,14 @@ cython_debug/
 # !data/testdata2d/simulation.hdf
 # !
 
-# !jax_example/inverse_diffusion.py
-# !jax_example/slim_natgrad/*.py
+# !jax_utils/inverse_diffusion.py
+# !jax_utils/slim_natgrad/*.py
 
 # # we should remove this again!
-# !jax_example/maximum.npy
-# !jax_example/minimum.npy
-# !jax_example/pdepoints.npy
-# !jax_example/target.npy
+# !jax_utils/maximum.npy
+# !jax_utils/minimum.npy
+# !jax_utils/pdepoints.npy
+# !jax_utils/target.npy
 
 # # etc...
 

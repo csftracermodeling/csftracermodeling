@@ -46,7 +46,7 @@ Install FreeSurfer.
 To create and environment for the scripts using FEniCS and FreeSurfer for data processing and simulations, run in the terminal:
 
 ```bash
-git clone https://github.com/bzapf/tracerdiffusion.git
+git clone https://github.com/csftracermodeling/csftracermodeling.git
 cd tracerdiffusion
 conda env create -f fenics-env.yml
 conda activate diffusion-fenics-env
@@ -58,7 +58,7 @@ For the scripts that rely only on FEniCS there is also a Dockerfile in this repo
 For Jax/PINNs scripts, run in the terminal:
 
 ```bash
-git clone https://github.com/bzapf/tracerdiffusion.git
+git clone https://github.com/csftracermodeling/csftracermodeling.git
 cd tracerdiffusion
 conda env create -f jax.yml
 conda activate jax

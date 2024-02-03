@@ -8,7 +8,7 @@ set -o nounset # Treat any unset variables as an error
 for DT in 450 900 1800 3600; do
     for ROI in 12 20 28; do
     if [ ! -f roi${ROI}/parenchyma_mask_roi${ROI}.xml ]; then
-        python scripts/inverse-model/make_roi.py \
+        python scripts/inverse-model/roi.py \
         --maskfile data/freesurfer/mri/parenchyma_mask.mgz \
         --resolution ${ROI}
     fi

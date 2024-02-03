@@ -15,21 +15,21 @@ jax.config.update("jax_enable_x64", True)
 # The following block of code culminates in defining omega.
 # This needs to integrate smoothly with Ludmils potato brain.
 # --------------------------------------------------------------#
-inputs = jnp.load("jax_example/input.npy")
-targets = jnp.load("jax_example/target.npy")
+inputs = jnp.load("jax_utils/input.npy")
+targets = jnp.load("jax_utils/target.npy")
 x = jnp.reshape(inputs[:, 0], (len(inputs), 1))
 y = jnp.reshape(inputs[:, 1], (len(inputs), 1))
 t = jnp.reshape(inputs[:, 2], (len(inputs), 1))
 inputs = jnp.concatenate([t, x, y], axis=1)
 
 
-minimum = jnp.load("jax_example/minimum.npy")
+minimum = jnp.load("jax_utils/minimum.npy")
 x = minimum[0]
 y = minimum[1]
 t = minimum[2]
 minimum = jnp.array([t, x, y])
 
-maximum = jnp.load("jax_example/maximum.npy")
+maximum = jnp.load("jax_utils/maximum.npy")
 x = maximum[0]
 y = maximum[1]
 t = maximum[2]
@@ -37,7 +37,7 @@ maximum = jnp.array([t, x, y])
 assert minimum[0] != maximum[0]
 
 # (x,y)
-pdepoints = jnp.load("jax_example/pdepoints.npy")
+pdepoints = jnp.load("jax_utils/pdepoints.npy")
 
 omega = DummyDomain(pdepoints)
 
@@ -59,7 +59,11 @@ interior_integrator = EvolutionaryIntegrator(
 data_integrator = DataIntegrator(random.PRNGKey(0), dataset, N=1000)
 
 # model
-activation = lambda x: jnp.tanh(x)
+
+
+def activation(x): return jnp.tanh(x)
+
+
 layer_sizes = [3, 64, 1]
 params = mlp.init_params(layer_sizes, random.PRNGKey(seed))
 unnormalized_model = mlp.mlp(activation)
@@ -86,9 +90,11 @@ b = jnp.array([0.0])
 params_d = [(w, b)]
 
 # differential operators
-dt = lambda g: del_i(g, 0)
-ddx_1 = lambda g: del_i(del_i(g, 1), 1)
-ddx_2 = lambda g: del_i(del_i(g, 2), 2)
+
+
+def dt(g): return del_i(g, 0)
+def ddx_1(g): return del_i(del_i(g, 1), 1)
+def ddx_2(g): return del_i(del_i(g, 2), 2)
 
 
 def heat_operator(u, params_d):
@@ -98,8 +104,10 @@ def heat_operator(u, params_d):
 
 
 # trick to get the signature (params, params_d, v_x) -> v_residual(params, params_d, v_x)
-_residual = lambda params, params_d: heat_operator(lambda x: model(params, x), params_d)
-residual = lambda params, params_d, x: _residual(params, params_d)(x)
+def _residual(params, params_d): return heat_operator(lambda x: model(params, x), params_d)
+def residual(params, params_d, x): return _residual(params, params_d)(x)
+
+
 v_residual = jit(vmap(residual, (None, None, 0)))
 
 

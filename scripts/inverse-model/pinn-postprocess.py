@@ -9,7 +9,7 @@ import json
 import matplotlib.pyplot as plt
 from tracerdiffusion.utils import cut_to_box
 from tracerdiffusion.data import Voxel_Data
-import tracerdiffusion.jax_example.slim_natgrad.mlp as mlp
+import tracerdiffusion.jax_utils.slim_natgrad.mlp as mlp
 
 import pickle
 
@@ -23,7 +23,7 @@ def load_nn(parserargs: dict, hyperparameters: dict):
     maximum = jnp.array(hyperparameters["maximum"])
 
     # model
-    activation = lambda x: jnp.tanh(x)
+    def activation(x): return jnp.tanh(x)
     unnormalized_model = mlp.mlp(activation)
 
     def model(params, x):

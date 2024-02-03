@@ -29,7 +29,7 @@ The following folders/files are needed:
 ## Getting started
 
 ```
-git clone https://github.com/bzapf/tracerdiffusion
+git clone https://github.com/csftracermodeling/csftracermodeling
 ```
 
 ## Usage
