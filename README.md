@@ -4,7 +4,7 @@
 
 - FreeSurfer needs to be installed
 - the conda environment `diffusion-fenics-env` needs to be created and the necessary packages installed (see below)
-- The following folders/files are needed and can be obtained from https://github.com/bzapf/rawdata and should be put into the top level under `/data/` in your cloned repository as:
+- The following folders/files are needed and can be obtained from Zenodo and should be put into the top level under `/data/` in your cloned repository as:
 ```
 ├──data
     ├──freesurfer
@@ -20,7 +20,7 @@
 
 Assumes that MRI have been processed and concentration estimates computed. 
 Also, a mesh is assumed and a region of interest (ROI).
-Alternatively, this data can be obtained from https://github.com/bzapf/concentrationdata
+Alternatively, this data can be obtained from Zenodo
 and should be put into the top level in your cloned repository under `/data/` as:
 ```
 ├──data
